@@ -1,0 +1,193 @@
+/** Single source of truth. JSON documents and MySQL columns use these fields. */
+const TABLES = {
+  admins: [
+    ["id", "int"],
+    ["name", "string"],
+    ["email", "string"],
+    ["password_hash", "string"],
+    ["role", "string"],
+    ["created_at", "string"],
+  ],
+  categories: [
+    ["id", "int"],
+    ["slug", "string"],
+    ["name", "string"],
+    ["emoji", "string"],
+    ["blurb", "string"],
+    ["color", "string"],
+    ["count_label", "string"],
+    ["parent_slug", "string"],
+    ["group_name", "string"],
+    ["nav_group", "string"],
+    ["filter_tag", "string"],
+    ["sort_order", "int"],
+    ["show_on_home", "tiny"],
+    ["show_in_footer", "tiny"],
+    ["show_in_nav", "tiny"],
+    ["virtual", "string"],
+    ["virtual_value", "string"],
+    ["active", "tiny"],
+  ],
+  products: [
+    ["id", "int"],
+    ["slug", "string"],
+    ["name", "string"],
+    ["emoji", "string"],
+    ["category_slug", "string"],
+    ["gender", "string"],
+    ["age_min", "int"],
+    ["age_max", "int"],
+    ["age_label", "string"],
+    ["price", "int"],
+    ["compare_price", "int"],
+    ["badge", "string"],
+    ["rating", "decimal"],
+    ["review_count", "int"],
+    ["stock", "int"],
+    ["sold", "int"],
+    ["description", "text"],
+    ["gradient", "string"],
+    ["brand", "string"],
+    ["sku", "string"],
+    ["tags", "string"],
+    ["featured", "tiny"],
+    ["is_deal", "tiny"],
+    ["active", "tiny"],
+    ["created_at", "string"],
+    ["updated_at", "string"],
+  ],
+  sections: [
+    ["id", "int"],
+    ["section_key", "string"],
+    ["name", "string"],
+    ["enabled", "tiny"],
+    ["sort_order", "int"],
+    ["payload", "json"],
+    ["updated_at", "string"],
+  ],
+  pages: [
+    ["id", "int"],
+    ["slug", "string"],
+    ["title", "string"],
+    ["group_name", "string"],
+    ["excerpt", "string"],
+    ["content", "text"],
+    ["emoji", "string"],
+    ["enabled", "tiny"],
+    ["sort_order", "int"],
+    ["updated_at", "string"],
+  ],
+  blog_posts: [
+    ["id", "int"],
+    ["slug", "string"],
+    ["title", "string"],
+    ["category", "string"],
+    ["excerpt", "string"],
+    ["content", "text"],
+    ["emoji", "string"],
+    ["gradient", "string"],
+    ["author", "string"],
+    ["read_time", "string"],
+    ["published_at", "string"],
+    ["enabled", "tiny"],
+  ],
+  reviews: [
+    ["id", "int"],
+    ["product_id", "int"],
+    ["author", "string"],
+    ["city", "string"],
+    ["role", "string"],
+    ["avatar", "string"],
+    ["stars", "int"],
+    ["text", "text"],
+    ["verified", "tiny"],
+    ["enabled", "tiny"],
+    ["created_at", "string"],
+  ],
+  orders: [
+    ["id", "int"],
+    ["order_no", "string"],
+    ["customer_name", "string"],
+    ["email", "string"],
+    ["phone", "string"],
+    ["address", "string"],
+    ["city", "string"],
+    ["payment_method", "string"],
+    ["status", "string"],
+    ["subtotal", "int"],
+    ["shipping", "int"],
+    ["discount", "int"],
+    ["total", "int"],
+    ["coupon_code", "string"],
+    ["notes", "text"],
+    ["created_at", "string"],
+  ],
+  order_items: [
+    ["id", "int"],
+    ["order_id", "int"],
+    ["product_id", "int"],
+    ["name", "string"],
+    ["emoji", "string"],
+    ["price", "int"],
+    ["qty", "int"],
+  ],
+  coupons: [
+    ["id", "int"],
+    ["code", "string"],
+    ["type", "string"],
+    ["value", "int"],
+    ["min_order", "int"],
+    ["active", "tiny"],
+    ["description", "string"],
+  ],
+  customers: [
+    ["id", "int"],
+    ["name", "string"],
+    ["email", "string"],
+    ["phone", "string"],
+    ["password_hash", "string"],
+    ["created_at", "string"],
+  ],
+  newsletter: [
+    ["id", "int"],
+    ["email", "string"],
+    ["created_at", "string"],
+  ],
+  inquiries: [
+    ["id", "int"],
+    ["type", "string"],
+    ["name", "string"],
+    ["email", "string"],
+    ["phone", "string"],
+    ["message", "text"],
+    ["status", "string"],
+    ["created_at", "string"],
+  ],
+};
+
+const SQL_TYPE = {
+  int: "INT",
+  tiny: "TINYINT",
+  decimal: "DECIMAL(4,2)",
+  string: "VARCHAR(255)",
+  text: "TEXT",
+  json: "LONGTEXT",
+};
+
+function sqlForTable(name) {
+  const cols = TABLES[name]
+    .map(([col, type]) => {
+      const sqlType = col === "description" || col === "content" || col === "message" || col === "text" || col === "notes" || col === "payload"
+        ? (type === "json" ? "LONGTEXT" : "TEXT")
+        : SQL_TYPE[type];
+      return `  \`${col}\` ${sqlType} NULL`;
+    })
+    .join(",\n");
+  return `CREATE TABLE IF NOT EXISTS \`${name}\` (\n${cols},\n  PRIMARY KEY (\`id\`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+}
+
+function schemaSql() {
+  return `-- Kidlo parallel schema. JSON collections use the same table and column names.\n${Object.keys(TABLES).map(sqlForTable).join("\n\n")}\n`;
+}
+
+module.exports = { TABLES, SQL_TYPE, schemaSql };

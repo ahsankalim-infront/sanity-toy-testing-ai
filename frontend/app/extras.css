@@ -1,0 +1,122 @@
+a,button,input,select,textarea{cursor:pointer}
+input,select,textarea{cursor:text}
+.menu-btn{display:none;width:42px;height:42px;border-radius:12px;border:none;background:var(--light);font-size:20px}
+.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Fredoka One',cursive;font-size:22px;color:var(--orange)}
+.nav-logo img{height:54px;object-fit:contain}
+
+.page-hero{background:linear-gradient(135deg,#FFF6E8 0%,#E8F9FF 55%,#FFE8F5 100%);padding:36px 60px 28px}
+.page-hero h1{font-family:'Fredoka One',cursive;font-size:46px;line-height:1.05;margin:8px 0;overflow-wrap:anywhere}
+.crumb{font-size:13px;font-weight:800;color:#999}
+.crumb a:hover{color:var(--orange)}
+.page-body{padding:36px 60px 72px}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.toolbar select,.field input,.field select,.field textarea{border:2px solid #E8E4DF;border-radius:14px;padding:12px 14px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;background:white;color:var(--dark);outline:none;width:100%}
+.toolbar select{width:auto}
+.field input:focus,.field select:focus,.field textarea:focus,.toolbar select:focus{border-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:12px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#888}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-card{background:white;border-radius:24px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.06)}
+
+.pdp{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.pdp-visual{border-radius:28px;min-height:420px;display:flex;align-items:center;justify-content:center;font-size:140px;position:relative}
+.pdp-price{font-family:'Fredoka One',cursive;font-size:40px;color:var(--orange)}
+.qty{display:inline-flex;align-items:center;border:2px solid #E8E4DF;border-radius:50px;overflow:hidden}
+.qty button{width:38px;height:38px;border:none;background:white;font-weight:900;font-size:18px}
+.qty span{min-width:28px;text-align:center;font-weight:800}
+
+.cart-layout{display:grid;grid-template-columns:1.6fr .8fr;gap:24px;align-items:start}
+.cart-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #F0EDE8}
+.summary-line{display:flex;justify-content:space-between;font-weight:800;margin-bottom:8px;color:#555}
+.summary-line.total{font-family:'Fredoka One',cursive;font-size:24px;color:var(--dark);margin-top:10px}
+
+.empty{text-align:center;padding:48px 16px}
+.empty .big{font-size:64px}
+
+.prose{overflow-wrap:anywhere}
+.prose h2{font-family:'Fredoka One',cursive;font-size:28px;margin:22px 0 8px}
+.prose h3{font-family:'Fredoka One',cursive;font-size:22px;margin:18px 0 8px}
+.prose p,.prose li{font-weight:650;color:#555;line-height:1.7;margin-bottom:10px}
+.prose ul{padding-left:18px;margin-bottom:12px}
+.faq details{background:white;border-radius:16px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.faq summary{font-weight:800;cursor:pointer}
+.faq p{margin-top:8px}
+
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:start}
+.note{background:#FFF6E8;border-radius:16px;padding:14px 16px;font-weight:700;color:#7a4a12;margin-bottom:16px}
+.ok-banner{background:#EDFFD9;border-radius:16px;padding:16px 18px;font-weight:800;color:#2d6a00}
+
+.stars{color:var(--yellow);letter-spacing:1px}
+.muted{color:#888;font-weight:700}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.admin-shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh;background:var(--light)}
+.admin-side{background:var(--dark);color:white;padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.admin-brand{font-family:'Fredoka One',cursive;font-size:26px;color:var(--yellow);padding:6px 12px 16px}
+.admin-side a{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;font-weight:800;color:rgba(255,255,255,.72);margin-bottom:4px}
+.admin-side a.active,.admin-side a:hover{background:var(--orange);color:white}
+.admin-main{padding:28px}
+.admin-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:white;border-radius:18px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.stat-card b{display:block;font-family:'Fredoka One',cursive;font-size:30px;color:var(--orange)}
+.table-wrap{overflow:auto;background:white;border-radius:18px;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data th,table.data td{padding:12px 14px;text-align:left;border-bottom:1px solid #F0EDE8;vertical-align:top}
+table.data th{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#888}
+.pill{display:inline-flex;align-items:center;border-radius:50px;padding:4px 10px;font-size:12px;font-weight:800;background:#FFF3E0;color:var(--orange)}
+.pill.good{background:#EDFFD9;color:#2f7a00}
+.pill.bad{background:#FFE8E8;color:var(--red)}
+.editor{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start}
+.editor-list button{width:100%;text-align:left;border:none;background:white;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-weight:800;font-family:inherit}
+.editor-list button.on{background:var(--orange);color:white}
+.json-box{font-family:ui-monospace,monospace;min-height:180px;font-size:12px}
+.login-wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#FFF6E8,#E8F9FF,#FFE8F5);padding:24px}
+.login-card{width:min(440px,100%);background:white;border-radius:28px;padding:32px;box-shadow:var(--shadow)}
+
+.nav-backdrop{display:none}
+.account-btn{padding:10px 18px}
+.text-btn{display:block;border:none;background:none;color:var(--red);font-weight:800;font-family:inherit;padding:4px 0}
+
+@media(max-width:1100px){
+  .menu-btn{display:inline-flex;align-items:center;justify-content:center}
+  nav{flex-wrap:wrap;height:auto;padding:8px 12px 10px;gap:8px 10px}
+  .nav-logo{margin-right:auto;min-width:0;width:min(120px,28vw)}
+  .nav-logo img{width:100%;height:40px;max-width:100%;object-fit:contain;object-position:left center}
+  .nav-search{flex:1 1 100%;max-width:none;order:4}
+  .nav-actions{order:3;flex-shrink:0}
+  .menu-btn{order:2}
+  .nav-menu{display:none;order:5;position:absolute;top:100%;left:0;right:0;background:white;flex-direction:column;align-items:stretch;padding:8px 12px 16px;border-bottom:2px solid #F0EDE8;max-height:min(70vh,560px);overflow:auto;box-shadow:0 18px 40px rgba(0,0,0,.08)}
+  .nav-menu.open{display:flex}
+  .nav-menu>li>a{padding:12px 10px}
+  .nav-menu>li:not(.open) .mega-drop{display:none}
+  .nav-menu>li.open .mega-drop{position:static;transform:none;min-width:0;width:100%;box-shadow:none;border:none;display:grid;grid-template-columns:1fr;padding:0 0 8px;border-radius:0}
+  .account-btn{position:relative;width:42px;height:42px;padding:0;justify-content:center;border-radius:12px}
+  .login-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .nav-search input,.field input,.field select,.field textarea,.nl-form input{font-size:16px}
+  .nav-backdrop{display:block;position:fixed;inset:0;border:none;background:rgba(26,26,46,.4);z-index:90}
+}
+@media(max-width:900px){
+  .page-hero,.page-body{padding-left:20px;padding-right:20px}
+  .page-hero h1{font-size:34px}
+  .pdp,.cart-layout,.split,.form-grid,.editor,.admin-shell,.stat-grid{grid-template-columns:1fr}
+  .pdp-visual{min-height:240px;font-size:96px}
+  .pdp-price{font-size:32px}
+  .admin-side{position:relative;height:auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .admin-brand{width:100%;padding-bottom:8px}
+  .admin-side a{margin-bottom:0}
+  .admin-main{padding:16px}
+  .coupon-row{flex-direction:column}
+}
+@media(max-width:700px){
+  .cart-row{grid-template-columns:64px minmax(0,1fr)}
+  .cart-row .qty,.cart-row .cart-line{grid-column:2}
+  .cart-row > div:nth-child(2){min-width:0}
+  .toolbar select{flex:1 1 calc(50% - 10px)}
+}
+@media(max-width:400px){
+  .icon-btn,.menu-btn,.account-btn{width:38px;height:38px}
+  .nav-logo img{max-width:92px;height:36px}
+  .nav{padding-left:8px;padding-right:8px}
+}

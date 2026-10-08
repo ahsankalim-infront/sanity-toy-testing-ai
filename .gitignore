@@ -1,0 +1,7 @@
+node_modules
+.next
+backend/data/store.json
+backend/.env
+frontend/.env.local
+.tools
+.tmp
