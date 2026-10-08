@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import CarCursor from "../../components/CarCursor";
+import NavProgress from "../../components/NavProgress";
 import { api } from "../../lib/format";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +17,8 @@ export default async function StoreLayout({ children }) {
   }
   return (
     <>
+      <Suspense fallback={null}><NavProgress /></Suspense>
+      <CarCursor />
       {offline ? <div className="topbar">The store API is not running. Start the backend on port 4000. {offline}</div> : null}
       <Header shell={shell} />
       <main>{children}</main>

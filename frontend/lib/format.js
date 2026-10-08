@@ -13,15 +13,24 @@ export function stars(rating) {
   return `${"★".repeat(full)}${"☆".repeat(Math.max(0, 5 - full))}`;
 }
 
+function serverApiBase() {
+  // Bracket access stays dynamic. Next.js would otherwise inline process.env.API_URL
+  // at build time, before Vercel injects the service binding.
+  const bound = process.env["API_URL"];
+  return bound || "http://127.0.0.1:4000";
+}
+
 export function apiBase() {
-  if (typeof window === "undefined") return process.env.API_URL || "http://127.0.0.1:4000";
+  if (typeof window === "undefined") return serverApiBase();
   return "";
 }
 
 export async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
   if (options.body && !(options.body instanceof FormData)) headers["Content-Type"] = "application/json";
-  const response = await fetch(`${apiBase()}${path}`, {
+  const base = apiBase();
+  const url = base ? new URL(path, base.endsWith("/") ? base : `${base}/`) : path;
+  const response = await fetch(url, {
     ...options,
     headers,
     cache: "no-store",

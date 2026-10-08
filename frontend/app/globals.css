@@ -356,14 +356,14 @@ footer{background:#0F0F1E;padding:64px 60px 28px;color:rgba(255,255,255,.7)}
   .footer-top{grid-template-columns:1.4fr 1fr 1fr}
   section,.band,.deal-section,.app-section,.nl-section,footer{padding-left:28px;padding-right:28px}
   .hero{grid-template-columns:1fr;padding:48px 28px}
-  .hero-right{display:none}
+  .hero-right{height:320px;order:-1}
+  .hero-circle{width:260px;height:260px}
   .hero h1{font-size:52px}
   .promo-row{margin:0 28px}
   .sec-head{font-size:36px}
 }
 @media(max-width:900px){
   .hero{grid-template-columns:1fr;padding:36px 20px}
-  .hero-right{display:none}
   .hero h1{font-size:48px}
   .deal-grid,.gender-hero,.app-section,.testi-grid,.blog-grid{grid-template-columns:1fr}
   .age-timeline{grid-template-columns:repeat(3,1fr)}
@@ -394,6 +394,9 @@ footer{background:#0F0F1E;padding:64px 60px 28px;color:rgba(255,255,255,.7)}
   .pcard-price{font-size:18px}
   .pcard-add{font-size:12px;padding:8px}
   .hero{padding:28px 16px}
+  .hero-right{height:240px}
+  .hero-circle{width:210px;height:210px}
+  .float-chip{display:none}
   .hero h1{font-size:40px}
   .hero-stats{gap:12px}
   .stat-num{font-size:22px}

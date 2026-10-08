@@ -10,5 +10,6 @@ function run(command, args, cwd) {
 }
 
 const root = path.join(__dirname, "..");
-run("npm", ["run", "dev"], path.join(root, "backend"));
-run("npm", ["run", "dev"], path.join(root, "frontend"));
+const mode = process.argv[2] === "start" ? "start" : "dev";
+run("npm", ["run", mode === "start" ? "start" : "dev"], path.join(root, "backend"));
+run("npm", ["run", mode], path.join(root, "frontend"));

@@ -5,6 +5,14 @@ const cors = require("cors");
 const crypto = require("crypto");
 const { DualStore } = require("./store");
 const { hashPassword, verifyPassword } = require("./seed");
+const { demoOrders } = require("./demo");
+
+const HERO_IMAGES = [
+  { src: "/hero/teddy.jpg", label: "Rainbow Teddy" },
+  { src: "/hero/rccar.jpg", label: "Turbo RC Car" },
+  { src: "/hero/robot.jpg", label: "Coding Robot" },
+  { src: "/hero/unicorn.jpg", label: "Unicorn Plush" },
+];
 
 const envPath = path.join(__dirname, "..", ".env");
 if (fs.existsSync(envPath)) {
@@ -98,8 +106,123 @@ function digits(value) {
   return String(value || "").replace(/\D/g, "").replace(/^92/, "0");
 }
 
+async function upgradeData() {
+  const hero = store.all("sections").find((row) => row.section_key === "hero");
+  if (hero && !Array.isArray(hero.payload?.images)) {
+    await store.update("sections", hero.id, { payload: { ...hero.payload, images: HERO_IMAGES } });
+  }
+  if (!store.data.meta.demo_orders && store.all("orders").length <= 1 && process.env.DEMO_ORDERS !== "0") {
+    const rules = sectionMap().commerce?.payload || {};
+    const demo = demoOrders({ products: activeProducts(), orders: store.all("orders"), orderItems: store.all("order_items"), rules });
+    store.data.orders = store.all("orders").concat(demo.orders);
+    store.data.order_items = store.all("order_items").concat(demo.items);
+    store.data.meta.demo_orders = demo.orders.length;
+    await store.persist("orders");
+    await store.persist("order_items");
+  }
+}
+
+function dayKey(value) {
+  const date = new Date(new Date(value).getTime() + 5 * 3600000);
+  return date.toISOString().slice(0, 10);
+}
+
+function countBy(rows, key, value = () => 1) {
+  const map = new Map();
+  for (const row of rows) {
+    const name = typeof key === "function" ? key(row) : row[key];
+    map.set(name || "Unknown", (map.get(name || "Unknown") || 0) + value(row));
+  }
+  return [...map.entries()].map(([label, total]) => ({ label, value: total })).sort((a, b) => b.value - a.value);
+}
+
+function summarize(orders, items, customers) {
+  const paid = orders.filter((row) => row.status !== "Cancelled");
+  const ids = new Set(paid.map((row) => Number(row.id)));
+  const lines = items.filter((row) => ids.has(Number(row.order_id)));
+  const revenue = paid.reduce((sum, row) => sum + Number(row.total || 0), 0);
+  return {
+    revenue,
+    orders: orders.length,
+    paidOrders: paid.length,
+    aov: paid.length ? Math.round(revenue / paid.length) : 0,
+    units: lines.reduce((sum, row) => sum + Number(row.qty || 0), 0),
+    discounts: paid.reduce((sum, row) => sum + Number(row.discount || 0), 0),
+    shipping: paid.reduce((sum, row) => sum + Number(row.shipping || 0), 0),
+    cancelled: orders.length - paid.length,
+    customers,
+  };
+}
+
+function buildReport(days) {
+  const now = Date.now();
+  const start = now - days * 86400000;
+  const prevStart = start - days * 86400000;
+  const allOrders = store.all("orders");
+  const allItems = store.all("order_items");
+  const products = store.all("products");
+  const categories = store.all("categories");
+  const inRange = (row, from, to) => {
+    const time = new Date(row.created_at).getTime();
+    return time >= from && time < to;
+  };
+  const orders = allOrders.filter((row) => inRange(row, start, now + 1));
+  const previous = allOrders.filter((row) => inRange(row, prevStart, start));
+  const newCustomers = store.all("customers").filter((row) => inRange(row, start, now + 1)).length;
+  const prevCustomers = store.all("customers").filter((row) => inRange(row, prevStart, start)).length;
+  const current = summarize(orders, allItems, newCustomers);
+  const before = summarize(previous, allItems, prevCustomers);
+  const change = Object.fromEntries(Object.keys(current).map((key) => [key, before[key] ? Math.round(((current[key] - before[key]) / before[key]) * 100) : null]));
+
+  const daily = [];
+  const byDay = new Map();
+  for (const row of orders) {
+    const key = dayKey(row.created_at);
+    const entry = byDay.get(key) || { revenue: 0, orders: 0 };
+    entry.orders += 1;
+    if (row.status !== "Cancelled") entry.revenue += Number(row.total || 0);
+    byDay.set(key, entry);
+  }
+  for (let index = days - 1; index >= 0; index -= 1) {
+    const key = dayKey(now - index * 86400000);
+    daily.push({ date: key, ...(byDay.get(key) || { revenue: 0, orders: 0 }) });
+  }
+
+  const paidIds = new Set(orders.filter((row) => row.status !== "Cancelled").map((row) => Number(row.id)));
+  const lines = allItems.filter((row) => paidIds.has(Number(row.order_id)));
+  const productMap = new Map(products.map((row) => [Number(row.id), row]));
+  const categoryName = new Map(categories.map((row) => [row.slug, row.name]));
+  const top = new Map();
+  for (const line of lines) {
+    const entry = top.get(line.product_id) || { id: line.product_id, name: line.name, emoji: line.emoji, units: 0, revenue: 0 };
+    entry.units += Number(line.qty);
+    entry.revenue += Number(line.price) * Number(line.qty);
+    top.set(line.product_id, entry);
+  }
+
+  return {
+    ...store.status(),
+    days,
+    summary: current,
+    change,
+    daily,
+    status: countBy(orders, "status"),
+    payments: countBy(orders.filter((row) => row.status !== "Cancelled"), (row) => String(row.payment_method || "").toUpperCase(), (row) => Number(row.total || 0)),
+    cities: countBy(orders.filter((row) => row.status !== "Cancelled"), "city", (row) => Number(row.total || 0)).slice(0, 8),
+    categories: countBy(lines, (row) => categoryName.get(productMap.get(Number(row.product_id))?.category_slug) || "Other", (row) => Number(row.price) * Number(row.qty)),
+    topProducts: [...top.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 8),
+    lowStock: products.filter((row) => row.active && row.stock <= 10).sort((a, b) => a.stock - b.stock).map((row) => ({ id: row.id, name: row.name, emoji: row.emoji, stock: row.stock, sold: row.sold })),
+    recent: [...orders].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 8),
+    orders: [...orders].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+    inquiries: store.all("inquiries").filter((row) => row.status === "new").length,
+    newsletter: store.all("newsletter").length,
+    pendingSync: (store.data.meta.pending_tables || []).length,
+  };
+}
+
 async function main() {
   await store.init();
+  await upgradeData();
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
@@ -369,6 +492,12 @@ async function main() {
       lowStock: products.filter((row) => row.stock > 0 && row.stock <= 10).length,
       pendingSync: (store.data.meta.pending_tables || []).length,
     });
+  });
+
+  app.get("/api/admin/reports", requireAdmin, async (req, res) => {
+    await store.ensureMysql();
+    const days = Math.max(1, Math.min(365, Number(req.query.days) || 30));
+    res.json(buildReport(days));
   });
 
   app.get("/api/admin/:table", requireAdmin, (req, res) => {

@@ -6,21 +6,33 @@ import ProductCard from "./ProductCard";
 import { api, discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
 
-export default function ProductView({ slug }) {
+function remember(id) {
+  try {
+    const recent = JSON.parse(localStorage.getItem("kidlo_recent") || "[]").filter((item) => item !== id);
+    localStorage.setItem("kidlo_recent", JSON.stringify([id, ...recent].slice(0, 8)));
+  } catch { /* storage unavailable */ }
+}
+
+export default function ProductView({ slug, initial = null }) {
   const { add, toggleWish, wished } = useCart();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(initial);
   const [error, setError] = useState("");
   const [qty, setQty] = useState(1);
   const [form, setForm] = useState({ author: "", city: "", stars: 5, text: "" });
   const [sent, setSent] = useState("");
 
   useEffect(() => {
+    setQty(1);
+    if (initial?.product?.slug === slug) {
+      setData(initial);
+      remember(initial.product.id);
+      return;
+    }
     api(`/api/products/${slug}`).then((payload) => {
       setData(payload);
-      const recent = JSON.parse(localStorage.getItem("kidlo_recent") || "[]").filter((id) => id !== payload.product.id);
-      localStorage.setItem("kidlo_recent", JSON.stringify([payload.product.id, ...recent].slice(0, 8)));
+      remember(payload.product.id);
     }).catch((err) => setError(err.message));
-  }, [slug]);
+  }, [slug, initial]);
 
   if (error) return <section className="page-body">{error}</section>;
   if (!data) return <section className="page-body">Loading toy…</section>;

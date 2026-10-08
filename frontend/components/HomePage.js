@@ -351,12 +351,69 @@ function Hero({ hero }) {
         </div>
       </div>
       <div className="hero-right">
-        <div className="hero-circle"><span className="hero-main-toy">{hero.toy || "🧸"}</span></div>
+        <HeroCircle images={hero.images || []} fallback={hero.toy || "🧸"} interval={Number(hero.rotate_seconds) || 4} />
         {(hero.chips || []).map((chip, index) => (
           <div key={chip.label} className={`float-chip fc${index + 1}`}><span className="fc-emoji">{chip.emoji}</span><span>{chip.label}</span></div>
         ))}
       </div>
     </section>
+  );
+}
+
+function shuffle(list) {
+  const copy = [...list];
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[swap]] = [copy[swap], copy[index]];
+  }
+  return copy;
+}
+
+function HeroCircle({ images, fallback, interval }) {
+  const valid = images.filter((item) => item && item.src);
+  const [order, setOrder] = useState(valid);
+  const [index, setIndex] = useState(0);
+  const key = valid.map((item) => item.src).join("|");
+
+  useEffect(() => {
+    setOrder(shuffle(valid));
+    setIndex(0);
+  }, [key]);
+
+  useEffect(() => {
+    if (order.length < 2) return undefined;
+    const timer = setInterval(() => {
+      setIndex((value) => {
+        const next = value + 1;
+        if (next < order.length) return next;
+        setOrder((current) => {
+          const reshuffled = shuffle(current);
+          if (reshuffled[0]?.src === current[current.length - 1]?.src) reshuffled.push(reshuffled.shift());
+          return reshuffled;
+        });
+        return 0;
+      });
+    }, interval * 1000);
+    return () => clearInterval(timer);
+  }, [order.length, interval]);
+
+  if (!order.length) {
+    return <div className="hero-circle"><span className="hero-main-toy">{fallback}</span></div>;
+  }
+  return (
+    <div className="hero-circle has-images">
+      {order.map((item, position) => (
+        <img
+          key={item.src}
+          src={item.src}
+          alt={item.label || "Kidlo toy"}
+          className={`hero-img ${position === index ? "on" : ""}`}
+          loading={position === 0 ? "eager" : "lazy"}
+          decoding="async"
+        />
+      ))}
+      {order[index]?.label ? <span className="hero-img-label">{order[index].label}</span> : null}
+    </div>
   );
 }
 

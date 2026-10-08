@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProductCard from "./ProductCard";
 import { api } from "../lib/format";
+import { catalogQuery } from "../lib/catalog";
 
 const PRICES = [
   { label: "Any price", min: "", max: "" },
@@ -16,29 +17,38 @@ const PRICES = [
   { label: "Premium", min: 5000, max: "" },
 ];
 
-export default function ShopBrowser({ slug = "", initialQuery = "" }) {
+const browserCache = typeof window === "undefined" ? null : new Map();
+
+export default function ShopBrowser({ slug = "", initial = null, initialKey = "" }) {
   const params = useSearchParams();
   const router = useRouter();
-  const [data, setData] = useState(null);
+  const key = catalogQuery(slug, params);
+  const cache = browserCache || new Map();
+  if (initial && initialKey) cache.set(initialKey, initial);
+  const [data, setData] = useState(() => (key === initialKey && initial) || cache.get(key) || null);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const age = params.get("age") || "";
-  const q = params.get("q") || initialQuery;
+  const q = params.get("q") || "";
   const sort = params.get("sort") || "featured";
   const min = params.get("min") || "";
   const max = params.get("max") || "";
 
   useEffect(() => {
-    const search = new URLSearchParams();
-    if (slug) search.set("slug", slug);
-    if (q) search.set("q", q);
-    if (age) search.set("age", age);
-    if (sort) search.set("sort", sort);
-    if (min) search.set("min", min);
-    if (max) search.set("max", max);
-    api(`/api/catalog?${search.toString()}`)
-      .then(setData)
-      .catch((err) => setError(err.message));
-  }, [slug, q, age, sort, min, max]);
+    let live = true;
+    const hit = cache.get(key);
+    if (hit) setData(hit);
+    setBusy(true);
+    setError("");
+    api(`/api/catalog?${key}`)
+      .then((payload) => {
+        cache.set(key, payload);
+        if (live) setData(payload);
+      })
+      .catch((err) => { if (live && !hit) setError(err.message); })
+      .finally(() => { if (live) setBusy(false); });
+    return () => { live = false; };
+  }, [key]);
 
   function push(next) {
     const search = new URLSearchParams(params.toString());
@@ -47,10 +57,10 @@ export default function ShopBrowser({ slug = "", initialQuery = "" }) {
       else search.set(key, value);
     });
     const path = slug ? `/shop/${slug}` : "/search";
-    router.push(`${path}?${search.toString()}`);
+    router.replace(`${path}?${search.toString()}`, { scroll: false });
   }
 
-  if (error) return <section className="page-body"><p>{error}</p></section>;
+  if (error && !data) return <section className="page-body"><p>{error}</p></section>;
   if (!data) return <section className="page-body"><p className="muted">Loading toys…</p></section>;
   const title = data.category?.name || (q ? `Search: ${q}` : "All Toys");
   const ages = [
@@ -98,7 +108,7 @@ export default function ShopBrowser({ slug = "", initialQuery = "" }) {
           </div>
         ) : null}
         {data.products.length ? (
-          <div className="product-grid">{data.products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+          <div className={`product-grid ${busy ? "is-loading" : ""}`}>{data.products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
         ) : (
           <div className="empty"><div className="big">🔍</div><h2 className="sec-head">No toys in this filter</h2><p className="sec-sub">Try another age or price.</p></div>
         )}
