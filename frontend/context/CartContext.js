@@ -84,7 +84,7 @@ export function CartProvider({ children }) {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   return (
-    <CartContext.Provider value={{ cart, wish, add, setQty, remove, clear, toggleWish, count, subtotal, toast, wished: (id) => wish.some((item) => item.id === id) }}>
+    <CartContext.Provider value={{ cart, wish, ready, add, setQty, remove, clear, toggleWish, count, subtotal, toast, wished: (id) => wish.some((item) => item.id === id) }}>
       {children}
       <div className="toast-wrap">
         {toasts.map((item) => (

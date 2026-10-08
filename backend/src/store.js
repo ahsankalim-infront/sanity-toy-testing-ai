@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { TABLES, schemaSql } = require("./schema");
+const { TABLES, columnSql, schemaSql } = require("./schema");
 const { buildSeed } = require("./seed");
 
 const DATA_DIR = path.join(__dirname, "..", "data");
@@ -81,33 +81,61 @@ class DualStore {
     };
   }
 
+  jsonReadPath() {
+    const runtime = path.join("/tmp", "kidlo-store.json");
+    if (process.env.VERCEL && fs.existsSync(runtime)) return runtime;
+    return JSON_PATH;
+  }
+
+  jsonWritePath() {
+    return process.env.VERCEL ? path.join("/tmp", "kidlo-store.json") : JSON_PATH;
+  }
+
   readFile() {
-    if (!fs.existsSync(JSON_PATH)) return null;
-    return JSON.parse(fs.readFileSync(JSON_PATH, "utf8"));
+    const file = this.jsonReadPath();
+    try {
+      if (!fs.existsSync(file)) return null;
+      return JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch (err) {
+      this.lastError = `JSON store could not be read (${err.message})`;
+      return null;
+    }
   }
 
   writeFile(data) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
     const ordered = { meta: data.meta || { pending_tables: [] } };
     for (const name of Object.keys(TABLES)) ordered[name] = data[name] || [];
-    fs.writeFileSync(JSON_PATH, JSON.stringify(ordered, null, 2));
     this.data = ordered;
+    const target = this.jsonWritePath();
+    try {
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.writeFileSync(target, JSON.stringify(ordered, null, 2));
+    } catch (err) {
+      this.lastError = `JSON file is not writable (${err.code || err.message}); serving the in-memory JSON store`;
+    }
   }
 
-  async init() {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(SCHEMA_PATH, schemaSql());
+  loadJson() {
     const existing = this.readFile();
     if (!existing) {
       const seed = buildSeed();
-      this.writeFile({ meta: { pending_tables: [] }, ...seed });
-    } else {
-      this.data = existing;
-      this.data.meta = this.data.meta || { pending_tables: [] };
-      for (const name of Object.keys(TABLES)) {
-        this.data[name] = (existing[name] || []).map((row) => normalizeRow(name, row));
-      }
+      this.writeFile({ meta: { pending_tables: [], source: "seed" }, ...seed });
+      return;
     }
+    this.data = existing;
+    this.data.meta = this.data.meta || { pending_tables: [] };
+    for (const name of Object.keys(TABLES)) {
+      this.data[name] = (existing[name] || []).map((row) => normalizeRow(name, row));
+    }
+  }
+
+  async init() {
+    try {
+      fs.writeFileSync(SCHEMA_PATH, schemaSql());
+    } catch {
+      /* The deploy filesystem is read-only. schema.sql is already in the project. */
+    }
+    this.loadJson();
     await this.tryConnect();
   }
 
@@ -118,9 +146,11 @@ class DualStore {
     const password = process.env.MYSQL_PASSWORD || "";
     const database = process.env.MYSQL_DATABASE || "kidlo";
     const port = Number(process.env.MYSQL_PORT || 3306);
-    if (process.env.MYSQL_DISABLED === "1") {
+    if (process.env.MYSQL_DISABLED === "1" || (process.env.VERCEL && !process.env.MYSQL_HOST)) {
       this.mysqlUp = false;
-      this.lastError = "MySQL disabled by MYSQL_DISABLED=1";
+      this.lastError = process.env.MYSQL_DISABLED === "1"
+        ? "MySQL disabled by MYSQL_DISABLED=1; serving JSON"
+        : "MySQL is not configured; serving JSON";
       return false;
     }
     let mysql;
@@ -131,7 +161,8 @@ class DualStore {
       this.lastError = "mysql2 is not installed";
       return false;
     }
-    try {
+    let stale = false;
+    const attempt = (async () => {
       const bootstrap = await mysql.createConnection({
         host,
         port,
@@ -141,6 +172,7 @@ class DualStore {
       });
       await bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
       await bootstrap.end();
+      if (stale) return false;
       if (this.pool) {
         try { await this.pool.end(); } catch { /* ignore */ }
       }
@@ -151,19 +183,42 @@ class DualStore {
         password,
         database,
         waitForConnections: true,
-        connectionLimit: 8,
+        connectionLimit: 4,
         connectTimeout: 2500,
       });
       await this.pool.query("SELECT 1");
       await this.ensureTables();
       await this.reconcile();
+      if (stale) {
+        try { await this.pool.end(); } catch { /* ignore */ }
+        this.pool = null;
+        return false;
+      }
       this.mysqlUp = true;
       this.lastError = "";
       return true;
+    })();
+    const timeout = new Promise((resolve) => {
+      setTimeout(() => {
+        stale = true;
+        resolve("timeout");
+      }, 4000);
+    });
+    try {
+      const result = await Promise.race([attempt, timeout]);
+      if (result === "timeout") {
+        this.mysqlUp = false;
+        this.lastError = "MySQL timed out; serving JSON";
+        return false;
+      }
+      return result;
     } catch (err) {
       this.mysqlUp = false;
-      this.lastError = err.message;
-      this.pool = null;
+      this.lastError = `MySQL unavailable (${err.message}); serving JSON`;
+      if (this.pool) {
+        try { await this.pool.end(); } catch { /* ignore */ }
+        this.pool = null;
+      }
       return false;
     }
   }
@@ -185,6 +240,13 @@ class DualStore {
   async ensureTables() {
     for (const statement of schemaSql().split(";").map((s) => s.trim()).filter((s) => s.startsWith("CREATE"))) {
       await this.pool.query(statement);
+    }
+    for (const name of Object.keys(TABLES)) {
+      const [cols] = await this.pool.query(`SHOW COLUMNS FROM \`${name}\``);
+      const have = new Set(cols.map((col) => col.Field));
+      for (const [col, type] of TABLES[name]) {
+        if (!have.has(col)) await this.pool.query(`ALTER TABLE \`${name}\` ADD COLUMN ${columnSql(col, type)}`);
+      }
     }
   }
 
@@ -227,6 +289,7 @@ class DualStore {
 
   all(name) {
     if (!TABLES[name]) throw new Error(`Unknown table ${name}`);
+    if (!this.data) this.loadJson();
     return (this.data[name] || []).map((row) => normalizeRow(name, row));
   }
 

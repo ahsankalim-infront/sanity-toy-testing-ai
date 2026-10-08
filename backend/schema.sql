@@ -125,6 +125,9 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `phone` VARCHAR(255) NULL,
   `address` VARCHAR(255) NULL,
   `city` VARCHAR(255) NULL,
+  `country_code` VARCHAR(255) NULL,
+  `country_name` VARCHAR(255) NULL,
+  `dial_code` VARCHAR(255) NULL,
   `payment_method` VARCHAR(255) NULL,
   `status` VARCHAR(255) NULL,
   `subtotal` INT NULL,
@@ -173,6 +176,28 @@ CREATE TABLE IF NOT EXISTS `newsletter` (
   `id` INT NULL,
   `email` VARCHAR(255) NULL,
   `created_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `countries` (
+  `id` INT NULL,
+  `code` VARCHAR(255) NULL,
+  `name` VARCHAR(255) NULL,
+  `dial` VARCHAR(255) NULL,
+  `flag` VARCHAR(255) NULL,
+  `example` VARCHAR(255) NULL,
+  `digits` INT NULL,
+  `active` TINYINT NULL,
+  `sort_order` INT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `cities` (
+  `id` INT NULL,
+  `country_code` VARCHAR(255) NULL,
+  `name` VARCHAR(255) NULL,
+  `active` TINYINT NULL,
+  `sort_order` INT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { DualStore } = require("./store");
 const { hashPassword, verifyPassword } = require("./seed");
 const { demoOrders } = require("./demo");
+const { buildPlaces } = require("./places");
 
 const HERO_IMAGES = [
   { src: "/hero/teddy.jpg", label: "Rainbow Teddy" },
@@ -27,7 +28,7 @@ const SECRET = process.env.JWT_SECRET || "kidlo-dev-secret";
 const store = new DualStore();
 
 const PUBLIC_TABLES = ["categories", "products", "sections", "pages", "blog_posts", "reviews", "coupons"];
-const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins"];
+const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities"];
 
 function sign(payload, days = 7) {
   const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + days * 86400000 })).toString("base64url");
@@ -106,10 +107,30 @@ function digits(value) {
   return String(value || "").replace(/\D/g, "").replace(/^92/, "0");
 }
 
+function nationalNumber(raw, country) {
+  let value = String(raw || "").replace(/\D/g, "");
+  const dial = String(country.dial || "").replace(/\D/g, "");
+  if (dial && value.startsWith(dial) && value.length > Number(country.digits)) value = value.slice(dial.length);
+  value = value.replace(/^0+/, "");
+  return value;
+}
+
 async function upgradeData() {
   const hero = store.all("sections").find((row) => row.section_key === "hero");
   if (hero && !Array.isArray(hero.payload?.images)) {
     await store.update("sections", hero.id, { payload: { ...hero.payload, images: HERO_IMAGES } });
+  }
+  if (!store.all("countries").length) {
+    const places = buildPlaces();
+    store.data.countries = places.countries;
+    store.data.cities = places.cities;
+    await store.persist("countries");
+    await store.persist("cities");
+  }
+  const orders = store.all("orders");
+  if (orders.some((row) => !row.country_code)) {
+    store.data.orders = orders.map((row) => (row.country_code ? row : { ...row, country_code: "PK", country_name: "Pakistan", dial_code: "+92" }));
+    await store.persist("orders");
   }
   if (!store.data.meta.demo_orders && store.all("orders").length <= 1 && process.env.DEMO_ORDERS !== "0") {
     const rules = sectionMap().commerce?.payload || {};
@@ -221,8 +242,13 @@ function buildReport(days) {
 }
 
 async function main() {
-  await store.init();
-  await upgradeData();
+  try {
+    await store.init();
+    await upgradeData();
+  } catch (err) {
+    console.error(err);
+    if (!store.data) store.loadJson();
+  }
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
@@ -230,6 +256,12 @@ async function main() {
   app.get("/api/health", async (_req, res) => {
     await store.ensureMysql();
     res.json({ ok: true, ...store.status() });
+  });
+
+  app.get("/api/places", (_req, res) => {
+    const countries = store.all("countries").filter((row) => row.active).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+    const cities = store.all("cities").filter((row) => row.active).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+    res.json({ countries, cities });
   });
 
   app.get("/api/home", (_req, res) => res.json(publicHome()));
@@ -357,9 +389,15 @@ async function main() {
   app.post("/api/orders", async (req, res) => {
     const body = req.body || {};
     const items = Array.isArray(body.items) ? body.items : [];
-    if (!body.customer_name || !body.phone || !body.address || !body.city) {
-      return res.status(400).json({ error: "Name, phone, address, and city are required" });
+    const country = store.all("countries").find((row) => row.active && row.code === String(body.country_code || "PK").toUpperCase());
+    if (!body.customer_name || !body.phone || !body.address || !body.city || !country) {
+      return res.status(400).json({ error: "Name, phone, address, city, and country are required" });
     }
+    const national = nationalNumber(body.phone, country);
+    if (national.length !== Number(country.digits)) {
+      return res.status(400).json({ error: `Enter a ${country.digits}-digit ${country.name} mobile number` });
+    }
+    const phone = country.code === "PK" ? `0${national}` : national;
     if (!items.length) return res.status(400).json({ error: "Your cart is empty" });
     const lines = [];
     let subtotal = 0;
@@ -388,9 +426,12 @@ async function main() {
       order_no: `KD${seq}`,
       customer_name: body.customer_name,
       email: body.email || "",
-      phone: digits(body.phone),
+      phone,
       address: body.address,
       city: body.city,
+      country_code: country.code,
+      country_name: country.name,
+      dial_code: country.dial,
       payment_method: body.payment_method || "cod",
       status: "Placed",
       subtotal,
@@ -556,5 +597,4 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
 });

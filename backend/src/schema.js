@@ -112,6 +112,9 @@ const TABLES = {
     ["phone", "string"],
     ["address", "string"],
     ["city", "string"],
+    ["country_code", "string"],
+    ["country_name", "string"],
+    ["dial_code", "string"],
     ["payment_method", "string"],
     ["status", "string"],
     ["subtotal", "int"],
@@ -153,6 +156,24 @@ const TABLES = {
     ["email", "string"],
     ["created_at", "string"],
   ],
+  countries: [
+    ["id", "int"],
+    ["code", "string"],
+    ["name", "string"],
+    ["dial", "string"],
+    ["flag", "string"],
+    ["example", "string"],
+    ["digits", "int"],
+    ["active", "tiny"],
+    ["sort_order", "int"],
+  ],
+  cities: [
+    ["id", "int"],
+    ["country_code", "string"],
+    ["name", "string"],
+    ["active", "tiny"],
+    ["sort_order", "int"],
+  ],
   inquiries: [
     ["id", "int"],
     ["type", "string"],
@@ -174,15 +195,14 @@ const SQL_TYPE = {
   json: "LONGTEXT",
 };
 
+function columnSql(col, type) {
+  const long = col === "description" || col === "content" || col === "message" || col === "text" || col === "notes" || col === "payload";
+  const sqlType = long ? (type === "json" ? "LONGTEXT" : "TEXT") : SQL_TYPE[type];
+  return `\`${col}\` ${sqlType} NULL`;
+}
+
 function sqlForTable(name) {
-  const cols = TABLES[name]
-    .map(([col, type]) => {
-      const sqlType = col === "description" || col === "content" || col === "message" || col === "text" || col === "notes" || col === "payload"
-        ? (type === "json" ? "LONGTEXT" : "TEXT")
-        : SQL_TYPE[type];
-      return `  \`${col}\` ${sqlType} NULL`;
-    })
-    .join(",\n");
+  const cols = TABLES[name].map(([col, type]) => `  ${columnSql(col, type)}`).join(",\n");
   return `CREATE TABLE IF NOT EXISTS \`${name}\` (\n${cols},\n  PRIMARY KEY (\`id\`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 }
 
@@ -190,4 +210,4 @@ function schemaSql() {
   return `-- Kidlo parallel schema. JSON collections use the same table and column names.\n${Object.keys(TABLES).map(sqlForTable).join("\n\n")}\n`;
 }
 
-module.exports = { TABLES, SQL_TYPE, schemaSql };
+module.exports = { TABLES, SQL_TYPE, columnSql, schemaSql };

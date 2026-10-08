@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { buildPlaces } = require("./places");
 
 function hashPassword(password, salt = "kidlo-static-salt") {
   const hash = crypto.scryptSync(password, salt, 32).toString("hex");
@@ -277,7 +278,7 @@ function buildSeed() {
   ];
 
   const orders = [
-    { id: 1, order_no: "KD1001", customer_name: "Ayesha Malik", email: "ayesha@example.com", phone: "03001234567", address: "House 12, Block C, Gulberg III", city: "Lahore", payment_method: "cod", status: "Shipped", subtotal: 2199, shipping: 0, discount: 0, total: 2199, coupon_code: "", notes: "Gift wrap please", created_at: "2025-09-02T08:30:00.000Z" },
+    { id: 1, order_no: "KD1001", customer_name: "Ayesha Malik", email: "ayesha@example.com", phone: "03001234567", address: "House 12, Block C, Gulberg III", city: "Lahore", country_code: "PK", country_name: "Pakistan", dial_code: "+92", payment_method: "cod", status: "Shipped", subtotal: 2199, shipping: 0, discount: 0, total: 2199, coupon_code: "", notes: "Gift wrap please", created_at: "2025-09-02T08:30:00.000Z" },
   ];
   const order_items = [
     { id: 1, order_id: 1, product_id: 14, name: "Rainbow Unicorn Plush 50cm", emoji: "🦄", price: 2199, qty: 1 },
@@ -297,6 +298,7 @@ function buildSeed() {
     customers: [],
     newsletter: [],
     inquiries: [],
+    ...buildPlaces(),
   };
 }
 
