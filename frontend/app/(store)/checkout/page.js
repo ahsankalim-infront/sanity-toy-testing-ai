@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api, pkr } from "../../../lib/format";
 import { useCart } from "../../../context/CartContext";
 import { CityField, PhoneField } from "../../../components/PlaceFields";
+import ProductMedia from "../../../components/ProductMedia";
 
 const EMPTY = { customer_name: "", email: "", phone: "", address: "", city: "Lahore", country_code: "PK", payment_method: "cod", coupon_code: "", notes: "" };
 
@@ -188,7 +189,7 @@ export default function CheckoutPage() {
               <ul className="checkout-items">
                 {cart.map((item) => (
                   <li key={item.id}>
-                    <span className="checkout-emoji" style={{ background: item.gradient || "#FFF3E0" }}>{item.emoji}</span>
+                    <span className="checkout-emoji" style={{ background: item.gradient || "#FFF3E0" }}><ProductMedia product={item} /></span>
                     <span>
                       <strong>{item.name}</strong>
                       <small>Qty {item.qty}</small>

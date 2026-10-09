@@ -77,7 +77,7 @@ export default function ShopBrowser({ slug = "", initial = null, initialKey = ""
     <>
       <div className="page-hero">
         <div className="crumb"><Link href="/">Home</Link> / {title}</div>
-        <h1>{data.category?.emoji ? `${data.category.emoji} ` : ""}{title}</h1>
+        <h1>{data.category?.image_url ? <img className="hero-inline-photo" src={data.category.image_url} alt="" /> : data.category?.emoji ? `${data.category.emoji} ` : ""}{title}</h1>
         <p className="sec-sub">{data.category?.blurb || "Safe, age-labelled toys with delivery across Pakistan."}</p>
       </div>
       <div className="page-body">

@@ -1,10 +1,10 @@
-"use client";
+import AdminLayoutClient from "../../components/admin/AdminLayoutClient";
 
-import { usePathname } from "next/navigation";
-import AdminShell from "../../components/admin/AdminShell";
+export const metadata = {
+  title: "Kidlo Admin",
+  robots: { index: false, follow: false, nocache: true },
+};
 
-export default function Layout({ children }) {
-  const path = usePathname();
-  if (path === "/admin/login") return children;
-  return <AdminShell>{children}</AdminShell>;
+export default function AdminLayout({ children }) {
+  return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }

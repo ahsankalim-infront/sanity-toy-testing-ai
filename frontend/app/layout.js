@@ -3,8 +3,13 @@ import "./extras.css";
 import { CartProvider } from "../context/CartContext";
 
 export const metadata = {
-  title: "Kidlo Toys – Play. Discover. Grow.",
+  title: {
+    default: "Kidlo Toys – Play. Discover. Grow.",
+    template: "%s",
+  },
   description: "Pakistan's most loved kids toy store. Safe toys, fast delivery, and cash on delivery.",
+  applicationName: "Kidlo Toys",
+  category: "shopping",
 };
 
 export default function RootLayout({ children }) {

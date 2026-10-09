@@ -3,8 +3,9 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
+const multer = require("multer");
 const { DualStore } = require("./store");
-const { hashPassword, verifyPassword } = require("./seed");
+const { buildSeed, hashPassword, verifyPassword } = require("./seed");
 const { demoOrders } = require("./demo");
 const { buildPlaces } = require("./places");
 
@@ -26,9 +27,37 @@ if (fs.existsSync(envPath)) {
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || "kidlo-dev-secret";
 const store = new DualStore();
+const UPLOAD_ROOT = process.env.UPLOAD_DIR || (process.env.VERCEL ? path.join("/tmp", "kidlo-uploads") : path.join(__dirname, "..", "uploads"));
+const PRODUCT_UPLOAD_DIR = path.join(UPLOAD_ROOT, "products");
+fs.mkdirSync(PRODUCT_UPLOAD_DIR, { recursive: true });
+
+const IMAGE_TYPES = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+};
+const uploadProductImage = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, done) => done(null, PRODUCT_UPLOAD_DIR),
+    filename: (_req, file, done) => {
+      const base = path.basename(file.originalname, path.extname(file.originalname))
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+        .slice(0, 50) || "product";
+      done(null, `${base}-${crypto.randomUUID().slice(0, 8)}${IMAGE_TYPES[file.mimetype] || ""}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, done) => {
+    if (!IMAGE_TYPES[file.mimetype]) return done(new Error("Upload a JPG, PNG, WebP, or GIF image"));
+    done(null, true);
+  },
+});
 
 const PUBLIC_TABLES = ["categories", "products", "sections", "pages", "blog_posts", "reviews", "coupons"];
-const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities"];
+const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities", "seo_entries", "media_files"];
 
 function sign(payload, days = 7) {
   const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + days * 86400000 })).toString("base64url");
@@ -107,6 +136,12 @@ function digits(value) {
   return String(value || "").replace(/\D/g, "").replace(/^92/, "0");
 }
 
+function normalizeSeoPath(value) {
+  let pathValue = String(value || "/").trim();
+  if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
+  return pathValue.length > 1 ? pathValue.replace(/\/+$/, "") : pathValue;
+}
+
 function nationalNumber(raw, country) {
   let value = String(raw || "").replace(/\D/g, "");
   const dial = String(country.dial || "").replace(/\D/g, "");
@@ -131,6 +166,15 @@ async function upgradeData() {
   if (orders.some((row) => !row.country_code)) {
     store.data.orders = orders.map((row) => (row.country_code ? row : { ...row, country_code: "PK", country_name: "Pakistan", dial_code: "+92" }));
     await store.persist("orders");
+  }
+  const seededSeo = buildSeed().seo_entries;
+  const currentSeo = store.all("seo_entries");
+  const knownPaths = new Set(currentSeo.map((row) => row.path));
+  const missingSeo = seededSeo.filter((row) => !knownPaths.has(row.path));
+  if (missingSeo.length) {
+    let nextId = currentSeo.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0);
+    store.data.seo_entries = currentSeo.concat(missingSeo.map((row) => ({ ...row, id: ++nextId })));
+    await store.persist("seo_entries");
   }
   if (!store.data.meta.demo_orders && store.all("orders").length <= 1 && process.env.DEMO_ORDERS !== "0") {
     const rules = sectionMap().commerce?.payload || {};
@@ -252,6 +296,7 @@ async function main() {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
+  app.use("/api/media", express.static(UPLOAD_ROOT, { maxAge: "7d" }));
 
   app.get("/api/health", async (_req, res) => {
     await store.ensureMysql();
@@ -311,6 +356,20 @@ async function main() {
     const related = activeProducts().filter((row) => row.category_slug === product.category_slug && row.id !== product.id).slice(0, 4);
     const reviews = store.all("reviews").filter((row) => row.enabled && Number(row.product_id) === Number(product.id));
     res.json({ product, related, reviews });
+  });
+
+  app.get("/api/seo", (req, res) => {
+    const requested = normalizeSeoPath(req.query.path);
+    const entry = store.all("seo_entries").find((row) => row.enabled && row.path === requested);
+    if (!entry) return res.status(404).json({ error: "SEO entry not found" });
+    res.json({ entry });
+  });
+
+  app.get("/api/seo-index", (_req, res) => {
+    const entries = store.all("seo_entries")
+      .filter((row) => row.enabled && !/\bnoindex\b/i.test(row.robots))
+      .map(({ path, updated_at }) => ({ path, updated_at }));
+    res.json({ entries });
   });
 
   app.get("/api/pages/:slug", (req, res) => {
@@ -449,6 +508,7 @@ async function main() {
         product_id: line.product.id,
         name: line.product.name,
         emoji: line.product.emoji,
+        image_url: line.product.image_url,
         price: line.product.price,
         qty: line.qty,
       });
@@ -546,11 +606,40 @@ async function main() {
     res.json({ rows: stripSecrets(store.all(req.params.table)) });
   });
 
+  app.post("/api/admin/media/upload", requireAdmin, (req, res) => {
+    uploadProductImage.single("file")(req, res, async (err) => {
+      if (err) {
+        const message = err.code === "LIMIT_FILE_SIZE" ? "Image must be 5 MB or smaller" : err.message;
+        return res.status(400).json({ error: message });
+      }
+      if (!req.file) return res.status(400).json({ error: "Choose an image to upload" });
+      try {
+        const media = await store.insert("media_files", {
+          file_name: req.file.filename,
+          url: `/api/media/products/${req.file.filename}`,
+          mime_type: req.file.mimetype,
+          size: req.file.size,
+          alt_text: String(req.body.alt_text || "").trim(),
+          created_at: new Date().toISOString(),
+        });
+        res.json({ media });
+      } catch (saveError) {
+        try { fs.unlinkSync(req.file.path); } catch { /* ignore cleanup errors */ }
+        res.status(500).json({ error: saveError.message || "Image could not be saved" });
+      }
+    });
+  });
+
   app.post("/api/admin/:table", requireAdmin, async (req, res) => {
     const table = req.params.table;
     if (!ADMIN_TABLES.includes(table)) return res.status(404).json({ error: "Unknown collection" });
     const input = { ...req.body };
     delete input.id;
+    if (table === "seo_entries") {
+      input.path = normalizeSeoPath(input.path);
+      if (!input.title || !input.description) return res.status(400).json({ error: "SEO title and description are required" });
+      if (store.all("seo_entries").some((row) => row.path === input.path)) return res.status(409).json({ error: "An SEO entry already exists for this path" });
+    }
     if (input.password) {
       input.password_hash = hashPassword(input.password);
       delete input.password;
@@ -565,6 +654,13 @@ async function main() {
     const input = { ...req.body };
     delete input.id;
     delete input.password_hash;
+    if (table === "seo_entries") {
+      input.path = normalizeSeoPath(input.path);
+      if (!input.title || !input.description) return res.status(400).json({ error: "SEO title and description are required" });
+      if (store.all("seo_entries").some((row) => row.path === input.path && Number(row.id) !== Number(req.params.id))) {
+        return res.status(409).json({ error: "An SEO entry already exists for this path" });
+      }
+    }
     if (input.password) {
       input.password_hash = hashPassword(input.password);
       delete input.password;
@@ -579,8 +675,13 @@ async function main() {
   app.delete("/api/admin/:table/:id", requireAdmin, async (req, res) => {
     const table = req.params.table;
     if (!ADMIN_TABLES.includes(table)) return res.status(404).json({ error: "Unknown collection" });
+    const media = table === "media_files" ? store.get("media_files", req.params.id) : null;
     const ok = await store.remove(table, req.params.id);
     if (!ok) return res.status(404).json({ error: "Not found" });
+    const imageUsed = ["products", "categories", "blog_posts"].some((name) => store.all(name).some((row) => row.image_url === media?.url));
+    if (media?.file_name && !imageUsed) {
+      try { fs.unlinkSync(path.join(PRODUCT_UPLOAD_DIR, path.basename(media.file_name))); } catch { /* file may already be gone */ }
+    }
     res.json({ ok: true });
   });
 

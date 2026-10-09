@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import { api, discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
+import ProductMedia from "./ProductMedia";
 
 function remember(id) {
   try {
@@ -58,7 +59,9 @@ export default function ProductView({ slug, initial = null }) {
       </div>
       <div className="page-body">
         <div className="pdp">
-          <div className="pdp-visual" style={{ background: product.gradient }}>{product.emoji}</div>
+          <div className={`pdp-visual ${product.image_url ? "has-photo" : ""}`} style={{ background: product.gradient }}>
+            <ProductMedia product={product} loading="eager" />
+          </div>
           <div>
             <span className="pcard-tag">{product.age_label}</span>
             <h1 className="sec-head" style={{ fontSize: 40 }}>{product.name}</h1>

@@ -127,6 +127,7 @@ class DualStore {
     for (const name of Object.keys(TABLES)) {
       this.data[name] = (existing[name] || []).map((row) => normalizeRow(name, row));
     }
+    this.writeFile(this.data);
   }
 
   async init() {

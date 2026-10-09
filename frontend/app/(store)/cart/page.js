@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, pkr } from "../../../lib/format";
 import { useCart } from "../../../context/CartContext";
+import ProductMedia from "../../../components/ProductMedia";
 
 export default function CartPage() {
   const { cart, setQty, remove, subtotal } = useCart();
@@ -26,7 +27,7 @@ export default function CartPage() {
             <div className="form-card">
               {cart.map((item) => (
                 <div className="cart-row" key={item.id}>
-                  <div className="rv-emoji" style={{ fontSize: 36 }}>{item.emoji}</div>
+                  <div className="cart-product-media"><ProductMedia product={item} /></div>
                   <div>
                     <Link href={`/product/${item.slug}`}><strong>{item.name}</strong></Link>
                     <div className="muted">{pkr(item.price)}</div>

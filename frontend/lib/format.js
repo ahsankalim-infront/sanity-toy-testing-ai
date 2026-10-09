@@ -27,14 +27,15 @@ export function apiBase() {
 
 export async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) };
-  if (options.body && !(options.body instanceof FormData)) headers["Content-Type"] = "application/json";
+  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body && !isForm) headers["Content-Type"] = "application/json";
   const base = apiBase();
   const url = base ? new URL(path, base.endsWith("/") ? base : `${base}/`) : path;
   const response = await fetch(url, {
     ...options,
     headers,
     cache: "no-store",
-    body: options.body && typeof options.body !== "string" ? JSON.stringify(options.body) : options.body,
+    body: options.body && typeof options.body !== "string" && !isForm ? JSON.stringify(options.body) : options.body,
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Request failed");

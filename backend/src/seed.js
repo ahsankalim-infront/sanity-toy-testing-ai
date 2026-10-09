@@ -241,20 +241,20 @@ function buildSeed() {
   ];
 
   const pages = [
-    page(1, "about", "About Kidlo", "company", "Who we are", "🏪", aboutHtml(), 1),
-    page(2, "our-story", "Our Story", "company", "Since 2019", "📖", storyHtml(), 2),
-    page(3, "careers", "Careers", "company", "Work with Kidlo", "💼", careersHtml(), 3),
-    page(4, "press", "Press Kit", "company", "Brand facts", "📰", pressHtml(), 4),
-    page(5, "privacy", "Privacy Policy", "company", "How we handle data", "🔒", privacyHtml(), 5),
-    page(6, "terms", "Terms of Use", "company", "Shopping terms", "📜", termsHtml(), 6),
-    page(7, "wholesale", "Wholesale", "company", "Trade accounts", "🏬", wholesaleHtml(), 7),
-    page(8, "returns", "Returns & Refunds", "support", "30-day returns", "🔄", returnsHtml(), 1),
-    page(9, "faqs", "FAQs", "support", "Quick answers", "❓", faqHtml(), 2),
-    page(10, "shipping", "Shipping Info", "support", "Delivery across Pakistan", "🚚", shippingHtml(), 3),
-    page(11, "age-guide", "Size & Age Guide", "support", "Pick the right stage", "🎂", ageGuideHtml(), 4),
-    page(12, "gift-cards", "Gift Cards", "support", "Give the choice of play", "🎁", giftHtml(), 5),
-    page(13, "bulk-orders", "Bulk Orders", "support", "Schools and events", "📦", bulkHtml(), 6),
-    page(14, "contact", "Contact Us", "support", "We are here to help", "💬", contactHtml(), 7),
+    page(1, "about", "About Kidlo", "company", "Thoughtful toys, dependable service, and clearer choices for families across Pakistan.", "🏪", aboutHtml(), 1),
+    page(2, "our-story", "Our Story", "company", "How a small Lahore catalogue grew into a nationwide destination for play.", "📖", storyHtml(), 2),
+    page(3, "careers", "Careers", "company", "Build a more thoughtful toy-shopping experience with the Kidlo team.", "💼", careersHtml(), 3),
+    page(4, "press", "Press Kit", "company", "Company facts, media contacts, and guidance for using the Kidlo brand.", "📰", pressHtml(), 4),
+    page(5, "privacy", "Privacy Policy", "company", "A clear explanation of how Kidlo collects, uses, and protects personal information.", "🔒", privacyHtml(), 5),
+    page(6, "terms", "Terms of Use", "company", "The terms that apply when browsing Kidlo or placing an order.", "📜", termsHtml(), 6),
+    page(7, "wholesale", "Wholesale", "company", "Trade supply and tailored quotations for retailers, institutions, and organisations.", "🏬", wholesaleHtml(), 7),
+    page(8, "returns", "Returns & Refunds", "support", "Eligibility, return steps, and refund timing explained clearly.", "🔄", returnsHtml(), 1),
+    page(9, "faqs", "FAQs", "support", "Practical answers about orders, products, payment, delivery, gifts, and returns.", "❓", faqHtml(), 2),
+    page(10, "shipping", "Shipping Info", "support", "Delivery charges, estimates, tracking, and important courier information.", "🚚", shippingHtml(), 3),
+    page(11, "age-guide", "Size & Age Guide", "support", "Choose safer, more engaging toys for every stage of childhood.", "🎂", ageGuideHtml(), 4),
+    page(12, "gift-cards", "Gift Cards", "support", "Give families the freedom to choose play they will genuinely enjoy.", "🎁", giftHtml(), 5),
+    page(13, "bulk-orders", "Bulk Orders", "support", "Planned toy sourcing for schools, celebrations, communities, and teams.", "📦", bulkHtml(), 6),
+    page(14, "contact", "Contact Us", "support", "Reach the right Kidlo team for products, orders, delivery, or business enquiries.", "💬", contactHtml(), 7),
   ];
 
   const blog_posts = [
@@ -277,11 +277,13 @@ function buildSeed() {
     { id: 3, code: "EID500", type: "flat", value: 500, min_order: 4000, active: 1, description: "PKR 500 off orders over PKR 4,000" },
   ];
 
+  const seo_entries = buildSeoEntries({ pages, products, categories, blog_posts });
+
   const orders = [
     { id: 1, order_no: "KD1001", customer_name: "Ayesha Malik", email: "ayesha@example.com", phone: "03001234567", address: "House 12, Block C, Gulberg III", city: "Lahore", country_code: "PK", country_name: "Pakistan", dial_code: "+92", payment_method: "cod", status: "Shipped", subtotal: 2199, shipping: 0, discount: 0, total: 2199, coupon_code: "", notes: "Gift wrap please", created_at: "2025-09-02T08:30:00.000Z" },
   ];
   const order_items = [
-    { id: 1, order_id: 1, product_id: 14, name: "Rainbow Unicorn Plush 50cm", emoji: "🦄", price: 2199, qty: 1 },
+    { id: 1, order_id: 1, product_id: 14, name: "Rainbow Unicorn Plush 50cm", emoji: "🦄", image_url: "", price: 2199, qty: 1 },
   ];
 
   return {
@@ -290,10 +292,12 @@ function buildSeed() {
     products,
     sections,
     pages,
+    seo_entries,
     blog_posts,
     reviews,
     orders,
     order_items,
+    media_files: [],
     coupons,
     customers: [],
     newsletter: [],
@@ -303,12 +307,12 @@ function buildSeed() {
 }
 
 function cat(id, slug, name, emoji, blurb, color, count_label, parent_slug, group_name, nav_group, filter_tag, sort_order, show_on_home, show_in_footer, show_in_nav, virtual = "", virtual_value = "") {
-  return { id, slug, name, emoji, blurb, color, count_label, parent_slug, group_name, nav_group, filter_tag, sort_order, show_on_home, show_in_footer, show_in_nav, virtual, virtual_value, active: 1 };
+  return { id, slug, name, emoji, image_url: "", image_alt: "", blurb, color, count_label, parent_slug, group_name, nav_group, filter_tag, sort_order, show_on_home, show_in_footer, show_in_nav, virtual, virtual_value, active: 1 };
 }
 
 function product(id, name, emoji, category_slug, gender, age_min, age_max, age_label, price, compare_price, badge, rating, review_count, stock, sold, description, gradient, brand, sku, tags, featured, is_deal) {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  return { id, slug, name, emoji, category_slug, gender, age_min, age_max, age_label, price, compare_price, badge, rating, review_count, stock, sold, description, gradient: `linear-gradient(135deg,${gradient})`, brand, sku, tags, featured, is_deal, active: 1, created_at: NOW, updated_at: NOW };
+  return { id, slug, name, emoji, image_url: "", image_alt: "", category_slug, gender, age_min, age_max, age_label, price, compare_price, badge, rating, review_count, stock, sold, description, gradient: `linear-gradient(135deg,${gradient})`, brand, sku, tags, featured, is_deal, active: 1, created_at: NOW, updated_at: NOW };
 }
 
 function section(id, section_key, name, sort_order, payload) {
@@ -319,8 +323,41 @@ function page(id, slug, title, group_name, excerpt, emoji, content, sort_order) 
   return { id, slug, title, group_name, excerpt, content, emoji, enabled: 1, sort_order, updated_at: NOW };
 }
 
+function buildSeoEntries({ pages, products, categories, blog_posts }) {
+  const rows = [
+    seo("/", "Kidlo Toys Pakistan | Toys for Every Age", "Shop trusted toys for babies and kids in Pakistan. Discover STEM, outdoor, pretend-play and gift ideas with COD and nationwide delivery.", "toys pakistan,kids toys,baby toys,online toy store", "website"),
+    seo("/search", "Search Toys | Kidlo Toys Pakistan", "Search Kidlo's toy collection by age, interest, category and price.", "search toys pakistan,kids toys", "website"),
+    seo("/blog", "Parenting Tips & Toy Guides | Kidlo Blog", "Practical toy safety, age guidance, learning ideas and gift inspiration for families.", "toy guides,parenting tips,gift ideas", "website"),
+    seo("/track", "Track My Order | Kidlo Toys", "Track your Kidlo order securely using your order number and checkout phone.", "track kidlo order,toy delivery pakistan", "website"),
+    seo("/cart", "Shopping Cart | Kidlo Toys", "Review the toys in your Kidlo shopping cart before checkout.", "", "website", "noindex,nofollow"),
+    seo("/checkout", "Secure Checkout | Kidlo Toys", "Complete your Kidlo order with secure delivery and payment details.", "", "website", "noindex,nofollow"),
+    seo("/wishlist", "My Wishlist | Kidlo Toys", "View your saved Kidlo toys and gift ideas.", "", "website", "noindex,nofollow"),
+    seo("/account", "My Account | Kidlo Toys", "Manage your Kidlo account and view your orders.", "", "website", "noindex,nofollow"),
+  ];
+  for (const item of pages) rows.push(seo(`/p/${item.slug}`, `${item.title} | Kidlo Toys`, item.excerpt, `${item.title.toLowerCase()},kidlo toys`, "article"));
+  for (const item of categories.filter((row) => row.active)) rows.push(seo(`/shop/${item.slug}`, `${item.name} | Shop Toys Online at Kidlo`, item.blurb || `Shop ${item.name.toLowerCase()} with nationwide delivery across Pakistan.`, `${item.name.toLowerCase()},toys pakistan`, "website"));
+  for (const item of products.filter((row) => row.active)) rows.push(seo(`/product/${item.slug}`, `${item.name} | Buy Online at Kidlo`, item.description, `${item.name.toLowerCase()},${item.tags},toys pakistan`, "product"));
+  for (const item of blog_posts.filter((row) => row.enabled)) rows.push(seo(`/blog/${item.slug}`, `${item.title} | Kidlo Blog`, item.excerpt, `${item.category.toLowerCase()},toy guide,pakistan`, "article"));
+  return rows.map((row, index) => ({ id: index + 1, ...row, updated_at: NOW }));
+}
+
+function seo(path, title, description, keywords, og_type, robots = "index,follow") {
+  return {
+    path,
+    title,
+    description,
+    keywords,
+    canonical: path,
+    image: "/logo.png",
+    robots,
+    og_type,
+    schema_json: {},
+    enabled: 1,
+  };
+}
+
 function post(id, slug, title, category, excerpt, emoji, gradient, author, read_time, published_at, content) {
-  return { id, slug, title, category, excerpt, content, emoji, gradient: `linear-gradient(135deg,${gradient})`, author, read_time, published_at, enabled: 1 };
+  return { id, slug, title, category, excerpt, content, emoji, image_url: "", image_alt: "", gradient: `linear-gradient(135deg,${gradient})`, author, read_time, published_at, enabled: 1 };
 }
 
 function review(id, product_id, author, city, role, avatar, stars, text) {
@@ -328,59 +365,59 @@ function review(id, product_id, author, city, role, avatar, stars, text) {
 }
 
 function aboutHtml() {
-  return `<p>Kidlo is a Pakistan-based online toy store for babies, toddlers, and growing kids. Parents shop by age, interest, and budget, then pay by cash on delivery, card, or mobile wallet.</p><p>We started in 2019 with a simple idea: safe toys should be easy to find, honestly priced, and delivered to the door. The catalogue mixes imported play sets with everyday favourites — RC cars, dolls, STEM kits, outdoor games, and baby toys.</p><h2>How the shop works</h2><ul><li>Browse by category, age, or search.</li><li>Add to cart and check out with COD, card, EasyPaisa, or JazzCash.</li><li>Orders over PKR 2,000 ship free. Most parcels arrive in 2–5 days.</li><li>Unopened items can be returned within 30 days.</li></ul><p>The storefront you see — hero, deals, categories, reviews, and pages — is edited from the Kidlo admin, so campaigns can change without a new release.</p>`;
+  return `<p>Kidlo is a Pakistan-based toy retailer helping families choose thoughtful, age-appropriate play without the uncertainty of an endless marketplace. Since 2019, we have served parents, gift-givers, schools, and businesses across the country.</p><div class="info-grid"><div class="info-card"><h3>Chosen with purpose</h3><p>We assess play value, age suitability, build quality, and the clarity of every product before it reaches the catalogue.</p></div><div class="info-card"><h3>Made for Pakistan</h3><p>Prices are in rupees, local payment methods are supported, and our delivery team understands addresses across Pakistan.</p></div><div class="info-card"><h3>Clear guidance</h3><p>Honest age bands, stock status, dimensions, and practical descriptions help customers choose with confidence.</p></div><div class="info-card"><h3>Human support</h3><p>Our Lahore team assists with gifts, product questions, orders, returns, schools, and business purchases.</p></div></div><h2>What you can expect</h2><ul><li>Cash on delivery, cards, EasyPaisa, and JazzCash at checkout.</li><li>Free standard delivery above PKR 2,000 and transparent fees below it.</li><li>Nationwide delivery, usually within 2–5 working days.</li><li>A practical 30-day return policy for eligible unused products.</li></ul><blockquote>Our purpose is simple: help every child discover something that invites imagination, movement, curiosity, or connection.</blockquote>`;
 }
 
 function storyHtml() {
-  return `<p>Kidlo began as a small Lahore storeroom and a WhatsApp catalogue. Parents kept asking for the same three things: an age label they could trust, a price in rupees without surprise fees, and a rider who actually called before arriving.</p><p>By 2022 the catalogue had grown past a thousand toys and delivery covered the major cities. The website now carries that same promise: show the real price, the real age range, and the stock we can ship.</p><h2>What we still care about</h2><ul><li>Age guidance on every product.</li><li>Flash deals that end when the timer ends.</li><li>A person on WhatsApp when a gift has to arrive before a birthday.</li></ul>`;
+  return `<p>Kidlo began in Lahore in 2019 with a small storeroom, a carefully selected range, and a WhatsApp catalogue. The goal was not to list every toy available; it was to make choosing the right one easier.</p><h2>From conversations to a better store</h2><p>Parents repeatedly asked for dependable age guidance, clear prices, reliable stock, and a delivery rider who would call before arriving. Those everyday concerns became the operating principles behind Kidlo.</p><div class="info-grid"><div class="info-card"><h3>2019 · The beginning</h3><p>A small local catalogue focused on gifts and early-years play.</p></div><div class="info-card"><h3>2021 · Beyond Lahore</h3><p>Courier partnerships expanded delivery to families across Pakistan.</p></div><div class="info-card"><h3>2023 · Smarter discovery</h3><p>Age, interest, gender, and budget filters made the growing range easier to navigate.</p></div><div class="info-card"><h3>Today · The same promise</h3><p>Real guidance, responsive support, and products we can confidently dispatch.</p></div></div><h2>What has not changed</h2><p>We remain focused on practical service: accurate listings, fair offers, careful packing, and a real person to help when a birthday or school event cannot wait.</p>`;
 }
 
 function careersHtml() {
-  return `<p>We hire buyers, warehouse leads, riders' coordinators, and customer guides in Lahore. Send a note with the role you want and a phone number. We read every inquiry from this page.</p><h2>Open interests</h2><ul><li>Catalogue buyer — toys and baby</li><li>Customer support — Urdu and English</li><li>Warehouse associate — Gulberg dispatch</li></ul><p>Use the form and choose Careers. There is no public application portal yet.</p>`;
+  return `<p>Kidlo brings together retail, e-commerce, customer care, buying, content, and fulfilment. We value thoughtful people who take ownership, communicate clearly, and understand that small service details matter to families.</p><h2>Teams at Kidlo</h2><div class="info-grid"><div class="info-card"><h3>Buying & catalogue</h3><p>Product research, supplier coordination, quality checks, merchandising, and accurate listings.</p></div><div class="info-card"><h3>Customer experience</h3><p>Order support in Urdu and English across phone, WhatsApp, email, and social channels.</p></div><div class="info-card"><h3>Operations</h3><p>Inventory accuracy, careful packing, dispatch, courier coordination, and returns.</p></div><div class="info-card"><h3>Digital & creative</h3><p>E-commerce, campaigns, photography, content, analytics, and product experience.</p></div></div><h2>How to apply</h2><p>Send your preferred role, city, relevant experience, availability, and a CV or portfolio link through the form below. If there is a suitable opening, our team will contact you. Kidlo is an equal-opportunity employer and never charges an application fee.</p>`;
 }
 
 function pressHtml() {
-  return `<p>Kidlo Toys Pvt. Ltd. is a direct-to-parent toy retailer based in Lahore, selling online across Pakistan since 2019.</p><ul><li>Brand: Kidlo Toys</li><li>Site: this storefront</li><li>Focus: kids and baby toys, STEM, outdoor, gifts</li><li>Office: 14-B, Gulberg III, Lahore</li><li>Press email: hello@kidlotoys.pk</li></ul><p>Please credit the brand as Kidlo when you mention the store.</p>`;
+  return `<p>Kidlo Toys is a Lahore-based, direct-to-consumer toy retailer serving families across Pakistan since 2019. We focus on age-appropriate toys, educational play, gifts, and a straightforward local shopping experience.</p><h2>Company facts</h2><div class="info-grid"><div class="info-card"><h3>Brand name</h3><p>Kidlo Toys</p></div><div class="info-card"><h3>Founded</h3><p>2019 in Lahore, Pakistan</p></div><div class="info-card"><h3>Categories</h3><p>Baby, pretend play, STEM, arts, outdoor, vehicles, dolls, and gifts.</p></div><div class="info-card"><h3>Service area</h3><p>Online delivery across Pakistan.</p></div></div><h2>Media enquiries</h2><p>For interviews, company information, product samples, or brand assets, email <strong>hello@kidlotoys.pk</strong> with your publication, deadline, and request. Please refer to the business as “Kidlo Toys” on first mention and “Kidlo” thereafter.</p><p class="policy-note">Logos and brand material may not be altered or used to imply a partnership or endorsement without written approval.</p>`;
 }
 
 function privacyHtml() {
-  return `<p>We collect the details needed to deliver an order: name, phone, address, city, and payment choice. Account passwords are stored as a salted hash. We do not sell customer lists.</p><p>Order data stays in the shop database (MySQL when it is available, and a JSON copy that keeps the site online if MySQL is down). Newsletter emails are stored only to send deals you asked for.</p><p>To review or delete an account, write to hello@kidlotoys.pk from the same email you used at checkout.</p>`;
+  return `<p>This policy explains what information Kidlo collects, why we use it, and the choices available to you when you browse, create an account, contact us, or place an order.</p><p><strong>Last updated: 9 October 2026.</strong></p><h2>Information we collect</h2><ul><li>Identity and contact details such as name, email, phone number, and delivery address.</li><li>Order information including products, payment method, delivery status, returns, and support history.</li><li>Account credentials stored as a protected password hash; Kidlo cannot view your password.</li><li>Basic device, browser, and site-usage information used for security and service improvement.</li></ul><h2>How we use information</h2><p>We use personal information to fulfil orders, process payments and refunds, provide support, prevent fraud, meet legal obligations, and improve our services. Marketing messages are sent only where you have requested them, and you may unsubscribe at any time.</p><h2>Sharing and retention</h2><p>Necessary details may be shared with payment providers, couriers, technology suppliers, and professional advisers working on our behalf. We do not sell personal information. Records are retained only for as long as reasonably required for service, accounting, dispute, and legal purposes.</p><h2>Your choices</h2><p>You may request access, correction, deletion, or marketing opt-out by emailing <strong>hello@kidlotoys.pk</strong> from the address associated with your account. Some transaction records may need to be retained where required by law.</p><p class="policy-note">Never send card numbers, PINs, passwords, or one-time codes to Kidlo by email, WhatsApp, or an inquiry form.</p>`;
 }
 
 function termsHtml() {
-  return `<p>Prices are in Pakistani rupees and include the discount shown on the product. A promo code applies once per order and only when the minimum spend is met. Cash on delivery can be refused if the phone number does not answer after two attempts.</p><p>Toys are sold for the age marked on the page. Kidlo is not a marketplace of private sellers; stock is purchased and shipped by us. Risk of loss passes when the courier marks the parcel delivered.</p>`;
+  return `<p>These terms govern your use of Kidlo and purchases made through the store. By placing an order, you confirm that the information supplied is accurate and that you are authorised to use the selected payment method.</p><p><strong>Last updated: 9 October 2026.</strong></p><h2>Orders and pricing</h2><p>Prices are shown in Pakistani rupees. Product availability, promotions, and delivery estimates may change. An order is accepted when Kidlo confirms it for fulfilment; we may cancel or adjust an order affected by a genuine pricing error, failed payment, unavailable stock, suspected fraud, or an unreachable delivery number.</p><h2>Payments, delivery, and ownership</h2><p>Available payment methods are displayed at checkout. Cash-on-delivery orders may require phone confirmation. Delivery dates are estimates and can be affected by courier capacity, weather, public holidays, security restrictions, or incomplete addresses. Responsibility for the parcel passes to the customer when delivery is recorded at the supplied address.</p><h2>Products and safe use</h2><p>Colours and packaging can vary slightly from images. Age labels, warnings, instructions, and adult-supervision guidance must be followed. Batteries and accessories are included only where the product description says so.</p><h2>Returns and acceptable use</h2><p>Eligible returns are handled under our Returns & Refunds policy. You may not misuse the site, attempt unauthorised access, copy protected material at scale, submit unlawful content, or use Kidlo for fraudulent transactions.</p><h2>Contact</h2><p>Questions about these terms may be sent to <strong>hello@kidlotoys.pk</strong>. Nothing in these terms removes rights that cannot legally be excluded under applicable Pakistani law.</p>`;
 }
 
 function wholesaleHtml() {
-  return `<p>Schools, birthday planners, and retailers can request a trade list. Tell us the city, the age group, and roughly how many pieces you need. We reply within one working day with availability and a bill.</p><p>Wholesale pricing starts at 12 mixed pieces of the same SKU. Branded gift wrap is optional.</p>`;
+  return `<p>Kidlo supplies selected toys to retailers, schools, event planners, corporate teams, and other registered organisations. Availability and trade pricing depend on product, quantity, destination, and lead time.</p><h2>Who we work with</h2><div class="info-grid"><div class="info-card"><h3>Retailers</h3><p>Repeat stock, mixed cartons, seasonal ranges, and product information.</p></div><div class="info-card"><h3>Schools & institutions</h3><p>Age-based learning, activity, reward, and recreation products.</p></div><div class="info-card"><h3>Events & gifting</h3><p>Birthday favours, family days, launches, and employee gifting.</p></div><div class="info-card"><h3>Corporate buyers</h3><p>Quotations, invoices, grouped packing, and planned delivery.</p></div></div><h2>Trade terms</h2><ul><li>Wholesale consideration generally begins at 12 units per SKU or an agreed mixed-carton value.</li><li>Prices exclude delivery unless the quotation states otherwise.</li><li>A deposit may be required for reserved, imported, customised, or high-volume stock.</li><li>Lead times begin after quotation approval and payment confirmation.</li></ul><p>Use the form below with your business name, city, product interest, estimated quantities, and required date. Our team will respond with availability and next steps.</p>`;
 }
 
 function returnsHtml() {
-  return `<p>You have 30 days from delivery to return an unused toy in its original pack. Defective items are collected at our cost. Change-of-mind returns are picked up in major cities; the customer pays the rider fee elsewhere.</p><h2>Refunds</h2><ul><li>COD orders are refunded by bank transfer or JazzCash.</li><li>Card payments go back to the same card in 5–7 working days after we receive the parcel.</li><li>Opened hygiene-sensitive baby items cannot be resold and are replaced only if faulty.</li></ul>`;
+  return `<p>We want every purchase to arrive complete and as described. Eligible unused products may be returned within 30 calendar days of delivery, while damaged, defective, or incorrect items should be reported as soon as possible.</p><h2>Start a return</h2><ol class="process"><li>Contact Kidlo with your order number and the item you want to return.</li><li>For damage, defects, or an incorrect item, share clear photos or a short video of the product and packaging.</li><li>Keep the item, accessories, manuals, labels, and original packaging together for collection.</li><li>After inspection, we confirm replacement, store credit, or refund and the expected timing.</li></ol><h2>Eligibility</h2><ul><li><strong>Change of mind:</strong> unused, unopened where sealed, complete, and in resalable packaging.</li><li><strong>Faulty or incorrect:</strong> Kidlo arranges collection and covers reasonable return delivery.</li><li><strong>Not eligible:</strong> used, damaged after delivery, incomplete, personalised, clearance marked final sale, or opened hygiene-sensitive baby items unless faulty.</li></ul><h2>Refund timing</h2><p>Card and wallet refunds are returned to the original method where possible, usually within 5–7 working days after approval. Cash-on-delivery refunds are sent by verified bank transfer or mobile wallet. Your bank or provider may require additional processing time.</p><p class="policy-note">A damaged outer courier bag does not always mean the product is damaged. If it is safe, photograph the parcel before opening and retain all packaging until your case is resolved.</p>`;
 }
 
 function faqHtml() {
-  return `<div class="faq"><details open><summary>Do you deliver outside Lahore and Karachi?</summary><p>Yes. Nationwide delivery is 2–5 days. Remote areas can take a day longer, and the courier calls before arrival.</p></details><details><summary>Is cash on delivery available?</summary><p>Yes, across Pakistan. Please keep the exact amount ready if you can. Card, EasyPaisa, and JazzCash are also offered at checkout.</p></details><details><summary>How do I track an order?</summary><p>Open Track My Order and enter the order number (for example KD1001) plus the phone used at checkout.</p></details><details><summary>Are the toys safe for babies?</summary><p>Check the age label on each product. Baby items are chosen for soft materials and no small detachable parts. Still supervise play.</p></details><details><summary>Can I send a gift?</summary><p>Orders over PKR 3,000 include free gift wrap and a short message. Add the message in the order notes.</p></details></div>`;
+  return `<p>Find quick answers about ordering, delivery, products, payments, gifts, and returns. For help with an existing purchase, include your order number when contacting us.</p><div class="faq"><details open><summary>Where does Kidlo deliver?</summary><p>We deliver across Pakistan through courier partners. Most orders arrive within 2–5 working days; remote destinations and high-volume periods may take longer.</p></details><details><summary>Which payment methods are available?</summary><p>Available options appear at checkout and may include cash on delivery, card, EasyPaisa, and JazzCash. Never share your PIN or one-time code with anyone claiming to be Kidlo.</p></details><details><summary>How do I track an order?</summary><p>Open Track My Order and enter the Kidlo order number plus the phone used at checkout. The demo order is KD1001 with 03001234567.</p></details><details><summary>Can I change or cancel an order?</summary><p>Contact us promptly. We can usually update an order before packing; after dispatch, a change may not be possible and courier or return charges can apply.</p></details><details><summary>How should I choose an age?</summary><p>Use the recommended age on the product page and consider the child's abilities and interests. For children under three, avoid products with small detachable parts and supervise all play.</p></details><details><summary>Are batteries included?</summary><p>Only when the product description specifically says they are included. We recommend having the stated battery type ready before gifting.</p></details><details><summary>Can Kidlo wrap a gift?</summary><p>Gift wrapping is complimentary on qualifying orders over PKR 3,000. Add the recipient message and any delivery instructions in the checkout notes.</p></details><details><summary>What if an item arrives damaged?</summary><p>Keep the item and packaging, take clear photos or a short video, and contact us with your order number. Eligible cases are replaced or refunded under our return policy.</p></details><details><summary>Do you support schools and bulk orders?</summary><p>Yes. Share the age group, quantities, budget, city, and required date through our Bulk Orders or Wholesale page for a tailored quotation.</p></details></div>`;
 }
 
 function shippingHtml() {
-  return `<p>Orders placed before 2 PM from Lahore or Karachi are dispatched the same day, Saturday included. Everyone else ships on the next working morning.</p><ul><li>Free delivery on orders of PKR 2,000 or more.</li><li>A flat PKR 199 fee under that amount.</li><li>You receive the order number as soon as checkout completes.</li></ul><p>If a toy is out of stock after you pay online, we refund that line before the parcel leaves.</p>`;
+  return `<p>Kidlo delivers throughout Pakistan using established courier partners. Most in-stock orders arrive within 2–5 working days after confirmation.</p><div class="info-grid"><div class="info-card"><h3>Standard delivery</h3><p>Free on qualifying orders of PKR 2,000 or more; PKR 199 below the threshold.</p></div><div class="info-card"><h3>Dispatch cut-off</h3><p>Confirmed Lahore and Karachi orders placed before 2 PM may dispatch the same day.</p></div><div class="info-card"><h3>Order tracking</h3><p>Use your order number and checkout phone on the Track My Order page.</p></div><div class="info-card"><h3>Courier contact</h3><p>Keep your phone available; the rider may call for directions or delivery confirmation.</p></div></div><h2>Delivery estimates</h2><ul><li><strong>Lahore and Karachi:</strong> typically 1–3 working days.</li><li><strong>Other major cities:</strong> typically 2–4 working days.</li><li><strong>Remote areas:</strong> typically 3–6 working days where courier service is available.</li></ul><h2>Important information</h2><p>Orders placed after the cut-off, on public holidays, or during major campaigns may dispatch the next working day. Weather, road closures, security restrictions, and courier capacity can affect estimates. Please provide a complete address, city, landmark, and reachable phone number.</p><p class="policy-note">Inspect the parcel for obvious damage or tampering before accepting it. If there is a concern, photograph the package and contact Kidlo promptly.</p>`;
 }
 
 function ageGuideHtml() {
-  return `<p>Age bands on Kidlo match how children actually play, not only the factory label.</p><ul><li><strong>0–2:</strong> sensory mats, teethers, push walkers. Nothing with small parts.</li><li><strong>3–5:</strong> big blocks, pretend play, first puzzles.</li><li><strong>6–8:</strong> RC cars, art sets, simple board games.</li><li><strong>9–11:</strong> STEM kits, strategy games, larger builds.</li><li><strong>12–14:</strong> coding robots, drones with an adult, hobby kits.</li><li><strong>15+:</strong> advanced kits. Drones and planes still need open space and supervision.</li></ul><p>When a gift is between two ages, choose the interest first and the age second. Our WhatsApp team will sanity-check a cart.</p>`;
+  return `<p>Age guidance is a starting point, not a measure of ability. Choose a toy that is safe for the youngest child who may access it, then consider interests, confidence, attention span, and the level of adult support available.</p><div class="info-grid"><div class="info-card"><h3>0–2 years</h3><p>Sensory textures, soft toys, rattles, stacking, push-and-pull play. Avoid small parts, long cords, and accessible batteries.</p></div><div class="info-card"><h3>3–5 years</h3><p>Pretend play, large building pieces, first puzzles, art, movement, and simple cause-and-effect games.</p></div><div class="info-card"><h3>6–8 years</h3><p>Construction sets, beginner STEM, craft kits, outdoor games, RC toys, and rule-based family games.</p></div><div class="info-card"><h3>9–11 years</h3><p>Detailed builds, science kits, strategy games, creative projects, robotics, and skill-based outdoor play.</p></div><div class="info-card"><h3>12–14 years</h3><p>Advanced STEM, coding, hobby kits, complex strategy, model making, and supervised drones.</p></div><div class="info-card"><h3>15+ years</h3><p>Collector pieces, advanced projects, technical builds, social games, and specialist hobby products.</p></div></div><h2>Size and fit</h2><p>For ride-ons, sports equipment, costumes, and wearable accessories, check product dimensions rather than relying on age alone. Compare measurements with an item that currently fits and allow room for safe movement—not excessive growth.</p><h2>Safety comes first</h2><ul><li>Follow the strictest age warning shown on the product or packaging.</li><li>Inspect toys regularly and remove damaged pieces, loose batteries, or broken cords.</li><li>Use helmets and protective equipment where recommended.</li><li>Supervise water, projectile, electrical, chemistry, ride-on, and drone play.</li></ul>`;
 }
 
 function giftHtml() {
-  return `<p>Kidlo gift cards are issued by email as a code you can apply at checkout, same as a coupon. Ask for one through the contact form with the amount (PKR 1,000, 2,000, or 5,000) and the recipient phone.</p><p>Cards do not expire for 12 months and cannot be exchanged for cash.</p>`;
+  return `<p>A Kidlo gift card lets parents and children choose the toy that suits them. Digital cards are issued as a unique checkout code and can be sent to the purchaser or directly to the recipient.</p><h2>Available values</h2><div class="info-grid"><div class="info-card"><h3>PKR 1,000</h3><p>A thoughtful contribution toward a favourite toy.</p></div><div class="info-card"><h3>PKR 2,000</h3><p>A flexible choice for birthdays and small celebrations.</p></div><div class="info-card"><h3>PKR 5,000</h3><p>Ideal for family gifting and milestone occasions.</p></div><div class="info-card"><h3>Custom value</h3><p>Ask our team about larger personal or corporate requirements.</p></div></div><h2>How it works</h2><ol class="process"><li>Submit the form with the value, recipient details, and preferred delivery date.</li><li>Our team confirms payment and prepares the unique digital card.</li><li>The recipient enters the code at checkout before completing payment.</li></ol><h2>Gift card terms</h2><ul><li>Valid for 12 months from issue unless the card states otherwise.</li><li>May be used toward products and standard delivery charges on Kidlo.</li><li>Not redeemable for cash and cannot be replaced after unauthorised sharing or use.</li><li>If the order exceeds the balance, the remaining amount is paid using an available checkout method.</li></ul>`;
 }
 
 function bulkHtml() {
-  return `<p>Planning a school stall, mehndi favours, or a society sports day? Send the date, city, and a rough list. We pack mixed boxes of outdoor toys, art kits, or baby gifts.</p><p>Lead time is usually 4 working days inside Punjab and 6 days for other provinces.</p>`;
+  return `<p>We help schools, organisations, event planners, and families source larger quantities without making every item identical. Tell us the audience and occasion; we can suggest an age-appropriate mix within your budget.</p><h2>Popular requirements</h2><div class="info-grid"><div class="info-card"><h3>Schools</h3><p>Prizes, activity days, classroom kits, sports events, and learning resources.</p></div><div class="info-card"><h3>Celebrations</h3><p>Birthday favours, Eid gifts, mehndi activities, and family events.</p></div><div class="info-card"><h3>Community events</h3><p>Society events, charity distributions, recreation, and children's programmes.</p></div><div class="info-card"><h3>Corporate gifting</h3><p>Family days, employee gifts, branded notes, and grouped delivery.</p></div></div><h2>What to include</h2><ul><li>Event date and delivery city.</li><li>Number of children and approximate age range.</li><li>Per-child or total budget.</li><li>Preferred categories, packaging, and any items to avoid.</li></ul><p>Standard lead time is around four working days within Punjab and six working days for other provinces after approval and payment. Large, customised, or imported requirements may need longer.</p>`;
 }
 
 function contactHtml() {
-  return `<p>Call or WhatsApp +92 300 1234567, email hello@kidlotoys.pk, or use the form. The Gulberg office is open Monday to Saturday, 9am to 9pm PKT.</p><p>For an order already placed, tracking with your order number is faster than a new message.</p>`;
+  return `<p>Our Lahore support team can help with products, orders, delivery, returns, gifts, schools, and business purchases. For the quickest resolution, include your order number where relevant.</p><div class="info-grid"><div class="info-card"><h3>Call or WhatsApp</h3><p><strong>+92 300 1234567</strong><br>Monday–Saturday, 9am–9pm PKT</p></div><div class="info-card"><h3>Email</h3><p><strong>hello@kidlotoys.pk</strong><br>Replies usually arrive within one working day.</p></div><div class="info-card"><h3>Visit or write</h3><p>14-B, Gulberg III<br>Lahore, Pakistan</p></div><div class="info-card"><h3>Existing orders</h3><p>Use Track My Order first for the latest fulfilment status.</p></div></div><h2>Before sending a message</h2><p>Do not share card details, PINs, passwords, or one-time codes. Kidlo representatives will never request them. Product and order enquiries should include enough detail for us to identify the item or purchase.</p>`;
 }
 
 function stemArticle() {

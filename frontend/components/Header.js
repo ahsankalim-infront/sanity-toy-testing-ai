@@ -96,7 +96,7 @@ export default function Header({ shell }) {
                 </Link>
                 {categories.filter((row) => row.nav_group === group.key).map((row) => (
                   <Link key={row.slug} href={`/shop/${row.slug}`} className="drop-item" onClick={() => setOpen(false)}>
-                    <div className="drop-icon" style={{ background: group.key === "girls" ? "#FFE8F3" : group.key === "boys" ? "#E8F0FF" : "#FFF3E0" }}>{row.emoji}</div>
+                    <div className={`drop-icon ${row.image_url ? "has-photo" : ""}`} style={{ background: group.key === "girls" ? "#FFE8F3" : group.key === "boys" ? "#E8F0FF" : "#FFF3E0" }}>{row.image_url ? <img src={row.image_url} alt="" /> : row.emoji}</div>
                     <div><span>{row.name}</span><small>{row.blurb || row.count_label}</small></div>
                   </Link>
                 ))}

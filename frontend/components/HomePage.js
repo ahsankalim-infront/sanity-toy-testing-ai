@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "./ProductCard";
+import ProductMedia from "./ProductMedia";
 import { api, pkr } from "../lib/format";
 import { useCart } from "../context/CartContext";
 
@@ -52,7 +53,7 @@ export default function HomePage({ data }) {
             {categories.map((row) => (
               <Link key={row.slug} href={`/shop/${row.slug}`} className={`cat-card ${row.color}`}>
                 {row.count_label ? <span className="cat-count">{row.count_label}</span> : null}
-                <span className="cat-emoji">{row.emoji}</span>
+                <span className={`cat-emoji ${row.image_url ? "has-photo" : ""}`}>{row.image_url ? <img src={row.image_url} alt={row.image_alt || row.name} /> : row.emoji}</span>
                 <h3>{row.name}</h3>
                 <p>{row.blurb}</p>
               </Link>
@@ -93,7 +94,7 @@ export default function HomePage({ data }) {
               <div style={{ marginBottom: 28 }}>
                 {deals.map((product) => (
                   <Link key={product.id} href={`/product/${product.slug}`} className="deal-mini">
-                    <span className="deal-mini-emoji">{product.emoji}</span>
+                    <span className="deal-mini-emoji"><ProductMedia product={product} /></span>
                     <div>
                       <p>{product.name}</p>
                       <small>{product.age_label} · {product.stock} left</small>
@@ -105,7 +106,7 @@ export default function HomePage({ data }) {
               <Link className="btn btn-yellow" href="/shop/sale">⚡ Shop All Deals</Link>
             </div>
             <div className="deal-product">
-              <span className="deal-emoji">{heroDeal.emoji}</span>
+              <span className={`deal-emoji ${heroDeal.image_url ? "has-photo" : ""}`}><ProductMedia product={heroDeal} /></span>
               <h3>{heroDeal.name}</h3>
               <p>{heroDeal.description}</p>
               <div className="deal-price-row">
@@ -287,7 +288,7 @@ export default function HomePage({ data }) {
           <div className="blog-grid">
             {posts.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`} className="blog-card">
-                <div className="blog-thumb" style={{ background: post.gradient }}>{post.emoji}</div>
+                <div className={`blog-thumb ${post.image_url ? "has-photo" : ""}`} style={{ background: post.gradient }}>{post.image_url ? <img src={post.image_url} alt={post.image_alt || post.title} /> : post.emoji}</div>
                 <div className="blog-body">
                   <div className="blog-cat">{post.category}</div>
                   <div className="blog-title">{post.title}</div>
@@ -503,7 +504,7 @@ function Recent({ products, title, label }) {
       <div className="rv-strip">
         {items.slice(0, 6).map((product) => (
           <Link key={product.id} href={`/product/${product.slug}`} className="rv-item">
-            <span className="rv-emoji">{product.emoji}</span>
+            <span className="rv-emoji"><ProductMedia product={product} /></span>
             <p>{product.name}</p>
             <span>{pkr(product.price)}</span>
           </Link>

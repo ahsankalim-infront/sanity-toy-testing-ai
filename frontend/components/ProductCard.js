@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
+import ProductMedia from "./ProductMedia";
 
 export default function ProductCard({ product }) {
   const { add, toggleWish, wished } = useCart();
@@ -11,8 +12,8 @@ export default function ProductCard({ product }) {
   return (
     <article className="pcard">
       <div className="pcard-img" style={{ background: product.gradient }}>
-        <span className="bg-emoji">{product.emoji}</span>
-        {product.emoji}
+        {!product.image_url ? <span className="bg-emoji">{product.emoji}</span> : null}
+        <ProductMedia product={product} />
         {product.badge ? <span className={`pbadge ${product.badge}`}>{product.badge.toUpperCase()}</span> : null}
         <button type="button" className="pcard-wish" onClick={() => toggleWish(product)} aria-label="Wishlist">
           {wished(product.id) ? "❤️" : "🤍"}

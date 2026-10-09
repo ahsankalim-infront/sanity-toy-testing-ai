@@ -50,7 +50,7 @@ export function CartProvider({ children }) {
     setCart((list) => {
       const found = list.find((item) => item.id === product.id);
       if (found) return list.map((item) => (item.id === product.id ? { ...item, qty: nextQty, stock } : item));
-      return [...list, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, price: product.price, gradient: product.gradient, qty: nextQty, stock }];
+      return [...list, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, image_url: product.image_url || "", image_alt: product.image_alt || "", price: product.price, gradient: product.gradient, qty: nextQty, stock }];
     });
     toast(`${product.name} added to cart`);
   }
@@ -76,7 +76,7 @@ export function CartProvider({ children }) {
     const exists = wish.some((item) => item.id === product.id);
     setWish(exists
       ? wish.filter((item) => item.id !== product.id)
-      : [...wish, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, price: product.price, gradient: product.gradient, stock: product.stock }]);
+      : [...wish, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, image_url: product.image_url || "", image_alt: product.image_alt || "", price: product.price, gradient: product.gradient, stock: product.stock }]);
     toast(exists ? "Removed from wishlist" : "Saved to wishlist");
   }
 

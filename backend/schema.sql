@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `slug` VARCHAR(255) NULL,
   `name` VARCHAR(255) NULL,
   `emoji` VARCHAR(255) NULL,
+  `image_url` VARCHAR(255) NULL,
+  `image_alt` VARCHAR(255) NULL,
   `blurb` VARCHAR(255) NULL,
   `color` VARCHAR(255) NULL,
   `count_label` VARCHAR(255) NULL,
@@ -36,6 +38,8 @@ CREATE TABLE IF NOT EXISTS `products` (
   `slug` VARCHAR(255) NULL,
   `name` VARCHAR(255) NULL,
   `emoji` VARCHAR(255) NULL,
+  `image_url` VARCHAR(255) NULL,
+  `image_alt` VARCHAR(255) NULL,
   `category_slug` VARCHAR(255) NULL,
   `gender` VARCHAR(255) NULL,
   `age_min` INT NULL,
@@ -86,6 +90,22 @@ CREATE TABLE IF NOT EXISTS `pages` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `seo_entries` (
+  `id` INT NULL,
+  `path` VARCHAR(255) NULL,
+  `title` VARCHAR(255) NULL,
+  `description` TEXT NULL,
+  `keywords` VARCHAR(255) NULL,
+  `canonical` VARCHAR(255) NULL,
+  `image` VARCHAR(255) NULL,
+  `robots` VARCHAR(255) NULL,
+  `og_type` VARCHAR(255) NULL,
+  `schema_json` LONGTEXT NULL,
+  `enabled` TINYINT NULL,
+  `updated_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `blog_posts` (
   `id` INT NULL,
   `slug` VARCHAR(255) NULL,
@@ -94,6 +114,8 @@ CREATE TABLE IF NOT EXISTS `blog_posts` (
   `excerpt` VARCHAR(255) NULL,
   `content` TEXT NULL,
   `emoji` VARCHAR(255) NULL,
+  `image_url` VARCHAR(255) NULL,
+  `image_alt` VARCHAR(255) NULL,
   `gradient` VARCHAR(255) NULL,
   `author` VARCHAR(255) NULL,
   `read_time` VARCHAR(255) NULL,
@@ -146,8 +168,20 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   `product_id` INT NULL,
   `name` VARCHAR(255) NULL,
   `emoji` VARCHAR(255) NULL,
+  `image_url` VARCHAR(255) NULL,
   `price` INT NULL,
   `qty` INT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `media_files` (
+  `id` INT NULL,
+  `file_name` VARCHAR(255) NULL,
+  `url` VARCHAR(255) NULL,
+  `mime_type` VARCHAR(255) NULL,
+  `size` INT NULL,
+  `alt_text` VARCHAR(255) NULL,
+  `created_at` VARCHAR(255) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

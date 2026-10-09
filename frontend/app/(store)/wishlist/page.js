@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { pkr } from "../../../lib/format";
 import { useCart } from "../../../context/CartContext";
+import ProductMedia from "../../../components/ProductMedia";
 
 export default function WishlistPage() {
   const { wish, toggleWish, add } = useCart();
@@ -14,7 +15,7 @@ export default function WishlistPage() {
           <div className="product-grid">
             {wish.map((item) => (
               <article className="pcard" key={item.id}>
-                <div className="pcard-img" style={{ background: item.gradient || "#FFF3E0" }}>{item.emoji}</div>
+                <div className="pcard-img" style={{ background: item.gradient || "#FFF3E0" }}><ProductMedia product={item} /></div>
                 <div className="pcard-body">
                   <Link href={`/product/${item.slug}`}><p className="pcard-name">{item.name}</p></Link>
                   <div className="pcard-price">{pkr(item.price)}</div>

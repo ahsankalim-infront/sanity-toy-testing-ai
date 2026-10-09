@@ -8,6 +8,8 @@ export default function SectionsPage() {
   const { rows, error, reload } = useAdminRows("sections");
   const [current, setCurrent] = useState(null);
   const [note, setNote] = useState("");
+  const [query, setQuery] = useState("");
+  const visible = rows.filter((row) => `${row.name} ${row.section_key}`.toLowerCase().includes(query.trim().toLowerCase()));
 
   function open(row) {
     setCurrent(JSON.parse(JSON.stringify(row)));
@@ -30,9 +32,13 @@ export default function SectionsPage() {
       <h1 className="sec-head" style={{ fontSize: 34 }}>Homepage sections</h1>
       <p className="sec-sub">Each block of the Kidlo homepage is a record. Turn it off, rewrite the copy, or change the hero, deals, ages, and footer.</p>
       {error ? <p>{error}</p> : null}
+      <div className="product-admin-toolbar">
+        <div className="nav-search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search homepage sections" aria-label="Search homepage sections" /></div>
+        <span>{visible.length} sections</span>
+      </div>
       <div className="editor" style={{ marginTop: 16 }}>
         <div className="editor-list">
-          {rows.map((row) => (
+          {visible.map((row) => (
             <button key={row.id} className={current?.id === row.id ? "on" : ""} onClick={() => open(row)}>
               {row.enabled ? "●" : "○"} {row.name}
             </button>
