@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { adminHeaders, useAdminRows } from "../../../components/admin/AdminShell";
+import MediaUploader from "../../../components/admin/MediaUploader";
 import { api, pkr } from "../../../lib/format";
 
 const blank = {
@@ -150,12 +151,17 @@ export default function ProductsAdmin() {
                 <p className="admin-help">When an image is selected, the storefront automatically hides the emoji. The emoji is only a fallback.</p>
                 <button className="btn btn-outline media-choose-button" type="button" onClick={() => setShowMedia((value) => !value)}>{showMedia ? "Close library" : "Choose from media library"}</button>
                 {showMedia ? (
-                  <div className="product-media-picker">
-                    {media.rows.length ? [...media.rows].reverse().map((row) => (
-                      <button type="button" key={row.id} className={row.url === draft.image_url ? "selected" : ""} onClick={() => chooseImage(row)}>
-                        <img src={row.url} alt={row.alt_text || row.file_name} /><span>{row.alt_text || row.file_name}</span>
-                      </button>
-                    )) : <p>No images yet. Upload one in the Media library.</p>}
+                  <div className="inline-media-library">
+                    <MediaUploader compact prompt="Upload a product image" onUploaded={async (row) => { await media.reload(); chooseImage(row); }} />
+                    {media.rows.length ? (
+                      <div className="product-media-picker">
+                        {[...media.rows].reverse().map((row) => (
+                          <button type="button" key={row.id} className={row.url === draft.image_url ? "selected" : ""} onClick={() => chooseImage(row)}>
+                            <img src={row.url} alt={row.alt_text || row.file_name} /><span>{row.alt_text || row.file_name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
                 <div className="field"><label>Image URL</label><input value={draft.image_url} onChange={(event) => set("image_url", event.target.value)} placeholder="/api/media/products/image.webp" /></div>

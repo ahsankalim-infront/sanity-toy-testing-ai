@@ -6,7 +6,7 @@ import { api } from "../../lib/format";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-export default function MediaUploader({ onUploaded, compact = false }) {
+export default function MediaUploader({ onUploaded, compact = false, prompt = "Drop an image here" }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
@@ -72,7 +72,7 @@ export default function MediaUploader({ onUploaded, compact = false }) {
         onDrop={(event) => { event.preventDefault(); setDragging(false); choose(event.dataTransfer.files?.[0]); }}
       >
         {preview ? <img src={preview} alt="Selected upload preview" /> : <span className="media-drop-icon">🖼️</span>}
-        <span><strong>{file ? file.name : "Drop a product image here"}</strong><small>or click to browse · JPG, PNG, WebP or GIF · max 5 MB</small></span>
+        <span><strong>{file ? file.name : prompt}</strong><small>or click to browse · JPG, PNG, WebP or GIF · max 5 MB</small></span>
       </button>
       {file ? (
         <div className="media-upload-actions">

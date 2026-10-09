@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { adminHeaders, useAdminRows } from "./AdminShell";
+import MediaUploader from "./MediaUploader";
 import { api, pkr } from "../../lib/format";
 
 const PAGE_SIZE = 12;
@@ -186,12 +187,18 @@ function ImagePicker({ draft, onChange }) {
         </div>
       </div>
       {open ? (
-        <div className="product-media-picker">
-          {media.rows.length ? [...media.rows].reverse().map((row) => (
-            <button type="button" key={row.id} className={row.url === draft.image_url ? "selected" : ""} onClick={() => choose(row)}>
-              <img src={row.url} alt={row.alt_text || row.file_name} /><span>{row.alt_text || row.file_name}</span>
-            </button>
-          )) : <p>No images yet. Upload one from Product media first.</p>}
+        <div className="inline-media-library">
+          <MediaUploader compact prompt={`Upload an image for ${label}`} onUploaded={async (row) => { await media.reload(); choose(row); }} />
+          {media.error ? <p className="media-note">{media.error}</p> : null}
+          {media.rows.length ? (
+            <div className="product-media-picker">
+              {[...media.rows].reverse().map((row) => (
+                <button type="button" key={row.id} className={row.url === draft.image_url ? "selected" : ""} onClick={() => choose(row)}>
+                  <img src={row.url} alt={row.alt_text || row.file_name} /><span>{row.alt_text || row.file_name}</span>
+                </button>
+              ))}
+            </div>
+          ) : <p className="admin-help">Uploaded images appear here and can be reused on products, categories, and blog posts.</p>}
         </div>
       ) : null}
       <div className="field"><label>Image URL</label><input value={draft.image_url || ""} onChange={(event) => onChange({ ...draft, image_url: event.target.value })} placeholder="/api/media/products/image.webp" /></div>

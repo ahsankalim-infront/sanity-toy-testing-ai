@@ -6889,7 +6889,17 @@
       "qty": 1
     }
   ],
-  "media_files": [],
+  "media_files": [
+    {
+      "id": 1,
+      "file_name": "shared-image-7-f0c40871.jpg",
+      "url": "/api/media/products/shared-image-7-f0c40871.jpg",
+      "mime_type": "image/jpeg",
+      "size": 366676,
+      "alt_text": "shared image (7)",
+      "created_at": "2026-10-09T15:05:46.089Z"
+    }
+  ],
   "coupons": [
     {
       "id": 1,
