@@ -8,9 +8,18 @@
       "cities",
       "products",
       "seo_entries",
-      "media_files"
+      "media_files",
+      "inquiries",
+      "notifications",
+      "games",
+      "customers",
+      "coin_transactions",
+      "game_plays"
     ],
-    "demo_orders": 90
+    "demo_orders": 90,
+    "games_seeded": 1,
+    "chance_daily_once": 1,
+    "coins_per_game_limit": 1
   },
   "admins": [
     {
@@ -597,7 +606,7 @@
       "is_deal": 0,
       "active": 1,
       "created_at": "2025-08-01T10:00:00.000Z",
-      "updated_at": "2026-10-08T10:12:45.043Z"
+      "updated_at": "2026-10-13T09:28:04.348Z"
     },
     {
       "id": 4,
@@ -2002,6 +2011,56 @@
         "title": "Still Thinking?"
       },
       "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 23,
+      "section_key": "whatsapp",
+      "name": "WhatsApp chat",
+      "enabled": 1,
+      "sort_order": 23,
+      "payload": {
+        "number": "923001234567",
+        "button_label": "Chat on WhatsApp",
+        "greeting": "Assalam o Alaikum Kidlo! I need help choosing a toy.",
+        "product_message": "Hi Kidlo, I want to order {product} ({price}). Link: {url}",
+        "hours": "Mon–Sat, 9am–9pm PKT",
+        "show_floating": 1,
+        "show_on_product": 1,
+        "banner_label": "Order on WhatsApp",
+        "banner_title": "Prefer to order on chat?",
+        "banner_text": "Send us a photo or a toy name. Our team replies with prices, stock, and delivery time for your city."
+      },
+      "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 24,
+      "section_key": "coins",
+      "name": "Kidlo Coins rules",
+      "enabled": 1,
+      "sort_order": 24,
+      "payload": {
+        "enabled": 1,
+        "coin_value_pkr": 1,
+        "max_redeem_percent": 20,
+        "min_redeem_coins": 50,
+        "signup_bonus": 25,
+        "daily_play_limit": 0
+      },
+      "updated_at": "2026-10-13T09:47:23.219Z"
+    },
+    {
+      "id": 25,
+      "section_key": "play_banner",
+      "name": "Play & Win banner",
+      "enabled": 1,
+      "sort_order": 25,
+      "payload": {
+        "label": "Play & Win",
+        "title": "Play games, win Kidlo Coins",
+        "text": "Log in to spin the wheel, open a gift box, or play Snake and Toy Cars. Coins you win come off your next toy order.",
+        "button": "Play now"
+      },
+      "updated_at": "2026-10-13T09:47:23.231Z"
     }
   ],
   "pages": [
@@ -3224,6 +3283,20 @@
       "schema_json": {},
       "enabled": 1,
       "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 76,
+      "path": "/games",
+      "title": "Play & Win Kidlo Coins | Kidlo Toys",
+      "description": "Log in, play quick games, win Kidlo Coins, and use them as a discount on toys.",
+      "keywords": "kidlo coins,play and win,toy rewards pakistan",
+      "canonical": "/games",
+      "image": "/logo.png",
+      "robots": "index,follow",
+      "og_type": "website",
+      "schema_json": {},
+      "enabled": 1,
+      "updated_at": "2025-08-01T10:00:00.000Z"
     }
   ],
   "blog_posts": [
@@ -3362,6 +3435,10 @@
       "discount": 0,
       "total": 2199,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Gift wrap please",
       "created_at": "2025-09-02T08:30:00.000Z"
     },
@@ -3383,6 +3460,10 @@
       "discount": 380,
       "total": 3418,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-27T17:34:37.955Z"
     },
@@ -3404,6 +3485,10 @@
       "discount": 0,
       "total": 11495,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-21T12:47:00.826Z"
     },
@@ -3425,6 +3510,10 @@
       "discount": 0,
       "total": 3499,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-07T23:35:21.930Z"
     },
@@ -3446,6 +3535,10 @@
       "discount": 0,
       "total": 2198,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-15T18:35:42.273Z"
     },
@@ -3467,6 +3560,10 @@
       "discount": 400,
       "total": 3598,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-05T11:00:19.983Z"
     },
@@ -3488,6 +3585,10 @@
       "discount": 0,
       "total": 6497,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-14T00:40:36.432Z"
     },
@@ -3509,6 +3610,10 @@
       "discount": 0,
       "total": 3198,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-18T08:18:28.230Z"
     },
@@ -3530,6 +3635,10 @@
       "discount": 1005,
       "total": 9040,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T05:25:53.029Z"
     },
@@ -3551,6 +3660,10 @@
       "discount": 0,
       "total": 7497,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-04T01:29:37.537Z"
     },
@@ -3572,6 +3685,10 @@
       "discount": 550,
       "total": 4945,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-10T18:42:50.585Z"
     },
@@ -3593,6 +3710,10 @@
       "discount": 0,
       "total": 6296,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T08:34:40.364Z"
     },
@@ -3614,6 +3735,10 @@
       "discount": 0,
       "total": 8596,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-18T08:45:53.553Z"
     },
@@ -3635,6 +3760,10 @@
       "discount": 0,
       "total": 5797,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-12T13:11:35.124Z"
     },
@@ -3656,6 +3785,10 @@
       "discount": 1080,
       "total": 9716,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-28T23:24:50.586Z"
     },
@@ -3677,6 +3810,10 @@
       "discount": 0,
       "total": 3798,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-26T23:44:35.307Z"
     },
@@ -3698,6 +3835,10 @@
       "discount": 0,
       "total": 15194,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-12T04:18:46.516Z"
     },
@@ -3719,6 +3860,10 @@
       "discount": 360,
       "total": 3238,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T05:43:41.406Z"
     },
@@ -3740,6 +3885,10 @@
       "discount": 0,
       "total": 6597,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-17T08:20:52.200Z"
     },
@@ -3761,6 +3910,10 @@
       "discount": 0,
       "total": 8398,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-31T16:55:45.572Z"
     },
@@ -3782,6 +3935,10 @@
       "discount": 0,
       "total": 1698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-10T14:32:09.847Z"
     },
@@ -3803,6 +3960,10 @@
       "discount": 0,
       "total": 3999,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-20T05:45:09.842Z"
     },
@@ -3824,6 +3985,10 @@
       "discount": 0,
       "total": 8446,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-10T20:45:28.875Z"
     },
@@ -3845,6 +4010,10 @@
       "discount": 0,
       "total": 6797,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-07T11:46:17.889Z"
     },
@@ -3866,6 +4035,10 @@
       "discount": 0,
       "total": 11195,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-03T18:19:34.114Z"
     },
@@ -3887,6 +4060,10 @@
       "discount": 0,
       "total": 12396,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-05T06:48:28.697Z"
     },
@@ -3908,6 +4085,10 @@
       "discount": 0,
       "total": 1597,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-22T04:47:13.812Z"
     },
@@ -3929,6 +4110,10 @@
       "discount": 0,
       "total": 2698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-05T22:24:57.346Z"
     },
@@ -3950,6 +4135,10 @@
       "discount": 1100,
       "total": 9895,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-14T00:25:20.935Z"
     },
@@ -3971,6 +4160,10 @@
       "discount": 1510,
       "total": 13585,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-12T11:52:14.436Z"
     },
@@ -3992,6 +4185,10 @@
       "discount": 850,
       "total": 7647,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-06T11:43:58.197Z"
     },
@@ -4013,6 +4210,10 @@
       "discount": 0,
       "total": 6598,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-15T12:03:24.502Z"
     },
@@ -4034,6 +4235,10 @@
       "discount": 0,
       "total": 6598,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-20T15:57:28.289Z"
     },
@@ -4055,6 +4260,10 @@
       "discount": 360,
       "total": 3238,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-10T12:26:41.139Z"
     },
@@ -4076,6 +4285,10 @@
       "discount": 0,
       "total": 1698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-04T13:14:41.278Z"
     },
@@ -4097,6 +4310,10 @@
       "discount": 0,
       "total": 3198,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-28T22:52:46.976Z"
     },
@@ -4118,6 +4335,10 @@
       "discount": 1040,
       "total": 9357,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-30T16:27:45.560Z"
     },
@@ -4139,6 +4360,10 @@
       "discount": 560,
       "total": 5037,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-13T04:50:33.317Z"
     },
@@ -4160,6 +4385,10 @@
       "discount": 0,
       "total": 2998,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-02T07:52:56.395Z"
     },
@@ -4181,6 +4410,10 @@
       "discount": 0,
       "total": 5597,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-11T20:15:25.174Z"
     },
@@ -4202,6 +4435,10 @@
       "discount": 400,
       "total": 3598,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-06T05:09:26.987Z"
     },
@@ -4223,6 +4460,10 @@
       "discount": 0,
       "total": 4396,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-17T22:01:16.268Z"
     },
@@ -4244,6 +4485,10 @@
       "discount": 0,
       "total": 5398,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-10T12:55:21.186Z"
     },
@@ -4265,6 +4510,10 @@
       "discount": 0,
       "total": 7996,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-06T18:08:37.672Z"
     },
@@ -4286,6 +4535,10 @@
       "discount": 0,
       "total": 2399,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T04:56:17.077Z"
     },
@@ -4307,6 +4560,10 @@
       "discount": 0,
       "total": 7596,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-16T14:21:26.209Z"
     },
@@ -4328,6 +4585,10 @@
       "discount": 0,
       "total": 3998,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-08T03:53:34.224Z"
     },
@@ -4349,6 +4610,10 @@
       "discount": 0,
       "total": 3198,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-30T15:46:25.270Z"
     },
@@ -4370,6 +4635,10 @@
       "discount": 0,
       "total": 8398,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-31T16:50:16.116Z"
     },
@@ -4391,6 +4660,10 @@
       "discount": 0,
       "total": 1698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-16T18:56:42.966Z"
     },
@@ -4412,6 +4685,10 @@
       "discount": 0,
       "total": 6598,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-17T13:28:08.446Z"
     },
@@ -4433,6 +4710,10 @@
       "discount": 0,
       "total": 2499,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-06T23:22:09.107Z"
     },
@@ -4454,6 +4735,10 @@
       "discount": 0,
       "total": 10245,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-30T06:15:25.006Z"
     },
@@ -4475,6 +4760,10 @@
       "discount": 0,
       "total": 2899,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-07T07:15:06.801Z"
     },
@@ -4496,6 +4785,10 @@
       "discount": 0,
       "total": 4798,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-31T15:35:23.323Z"
     },
@@ -4517,6 +4810,10 @@
       "discount": 0,
       "total": 1698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-11T22:29:32.471Z"
     },
@@ -4538,6 +4835,10 @@
       "discount": 0,
       "total": 5598,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-26T09:54:56.601Z"
     },
@@ -4559,6 +4860,10 @@
       "discount": 0,
       "total": 8097,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-22T09:53:18.280Z"
     },
@@ -4580,6 +4885,10 @@
       "discount": 240,
       "total": 2159,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T00:35:48.833Z"
     },
@@ -4601,6 +4910,10 @@
       "discount": 0,
       "total": 8296,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-26T22:53:01.292Z"
     },
@@ -4622,6 +4935,10 @@
       "discount": 330,
       "total": 2969,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-25T11:57:07.760Z"
     },
@@ -4643,6 +4960,10 @@
       "discount": 1000,
       "total": 8997,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-05T19:59:54.165Z"
     },
@@ -4664,6 +4985,10 @@
       "discount": 550,
       "total": 4949,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-04T00:53:57.509Z"
     },
@@ -4685,6 +5010,10 @@
       "discount": 0,
       "total": 1098,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-20T11:48:31.849Z"
     },
@@ -4706,6 +5035,10 @@
       "discount": 0,
       "total": 6797,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-10T23:22:01.970Z"
     },
@@ -4727,6 +5060,10 @@
       "discount": 0,
       "total": 1848,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-03T05:52:57.192Z"
     },
@@ -4748,6 +5085,10 @@
       "discount": 0,
       "total": 3198,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-20T04:28:29.241Z"
     },
@@ -4769,6 +5110,10 @@
       "discount": 0,
       "total": 6998,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-23T20:03:34.816Z"
     },
@@ -4790,6 +5135,10 @@
       "discount": 280,
       "total": 2518,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-23T00:20:03.592Z"
     },
@@ -4811,6 +5160,10 @@
       "discount": 0,
       "total": 11096,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-28T13:10:30.669Z"
     },
@@ -4832,6 +5185,10 @@
       "discount": 0,
       "total": 12396,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-03T18:37:47.140Z"
     },
@@ -4853,6 +5210,10 @@
       "discount": 390,
       "total": 3507,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-20T01:17:57.706Z"
     },
@@ -4874,6 +5235,10 @@
       "discount": 480,
       "total": 4318,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-07T19:41:22.734Z"
     },
@@ -4895,6 +5260,10 @@
       "discount": 0,
       "total": 1598,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-01T10:21:36.149Z"
     },
@@ -4916,6 +5285,10 @@
       "discount": 0,
       "total": 9997,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-21T16:53:40.606Z"
     },
@@ -4937,6 +5310,10 @@
       "discount": 0,
       "total": 4997,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-05T21:09:12.449Z"
     },
@@ -4958,6 +5335,10 @@
       "discount": 0,
       "total": 6395,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-08T08:21:47.648Z"
     },
@@ -4979,6 +5360,10 @@
       "discount": 0,
       "total": 7197,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-19T05:29:07.501Z"
     },
@@ -5000,6 +5385,10 @@
       "discount": 0,
       "total": 4798,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-18T03:24:20.147Z"
     },
@@ -5021,6 +5410,10 @@
       "discount": 0,
       "total": 5647,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-07T21:49:52.016Z"
     },
@@ -5042,6 +5435,10 @@
       "discount": 0,
       "total": 1498,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-11T08:04:27.262Z"
     },
@@ -5063,6 +5460,10 @@
       "discount": 910,
       "total": 8185,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-30T17:28:36.012Z"
     },
@@ -5084,6 +5485,10 @@
       "discount": 0,
       "total": 6698,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-18T06:30:59.105Z"
     },
@@ -5105,6 +5510,10 @@
       "discount": 0,
       "total": 2197,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-10-02T20:58:37.355Z"
     },
@@ -5126,6 +5535,10 @@
       "discount": 400,
       "total": 3599,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-31T21:36:55.989Z"
     },
@@ -5147,6 +5560,10 @@
       "discount": 0,
       "total": 8797,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-22T07:41:56.190Z"
     },
@@ -5168,6 +5585,10 @@
       "discount": 980,
       "total": 8815,
       "coupon_code": "KIDLO50",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-22T19:53:22.211Z"
     },
@@ -5189,6 +5610,10 @@
       "discount": 0,
       "total": 2899,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-11T00:23:53.213Z"
     },
@@ -5210,6 +5635,10 @@
       "discount": 0,
       "total": 7297,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-16T19:28:11.134Z"
     },
@@ -5231,6 +5660,10 @@
       "discount": 0,
       "total": 6097,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-09-02T14:40:07.412Z"
     },
@@ -5252,6 +5685,10 @@
       "discount": 0,
       "total": 8897,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "Demo order for dashboard reports",
       "created_at": "2026-08-17T10:34:19.935Z"
     },
@@ -5273,6 +5710,10 @@
       "discount": 0,
       "total": 5148,
       "coupon_code": "",
+      "customer_id": 0,
+      "coins_used": 0,
+      "coins_discount": 0,
+      "coins_refunded": 0,
       "notes": "",
       "created_at": "2026-10-08T10:12:45.023Z"
     }
@@ -6929,7 +7370,244 @@
       "description": "PKR 500 off orders over PKR 4,000"
     }
   ],
-  "customers": [],
+  "customers": [
+    {
+      "id": 1,
+      "name": "Ahsan",
+      "email": "ahsan@gmail.com",
+      "phone": "387y329",
+      "password_hash": "kidlo-static-salt:387afe88c19433de7c6a4172d06c77d367ecffb1d3916117c354bfc3a41030e0",
+      "coins": 35,
+      "games_blocked": 0,
+      "created_at": "2026-10-13T09:36:38.572Z"
+    }
+  ],
+  "games": [
+    {
+      "id": 1,
+      "slug": "spin-wheel",
+      "name": "Spin the Wheel",
+      "type": "spin",
+      "emoji": "🎡",
+      "description": "Spin once and land on a coin prize. Every spin is decided fairly on our server.",
+      "cost_coins": 0,
+      "daily_limit": 1,
+      "prizes": [
+        {
+          "label": "5 coins",
+          "coins": 5,
+          "weight": 30
+        },
+        {
+          "label": "10 coins",
+          "coins": 10,
+          "weight": 25
+        },
+        {
+          "label": "Try again",
+          "coins": 0,
+          "weight": 20
+        },
+        {
+          "label": "25 coins",
+          "coins": 25,
+          "weight": 12
+        },
+        {
+          "label": "50 coins",
+          "coins": 50,
+          "weight": 8
+        },
+        {
+          "label": "100 coins",
+          "coins": 100,
+          "weight": 4
+        },
+        {
+          "label": "Try again",
+          "coins": 0,
+          "weight": 15
+        },
+        {
+          "label": "250 coins",
+          "coins": 250,
+          "weight": 1
+        }
+      ],
+      "enabled": 1,
+      "sort_order": 1,
+      "created_at": "2025-08-01T10:00:00.000Z",
+      "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "slug": "mystery-box",
+      "name": "Mystery Box",
+      "type": "box",
+      "emoji": "🎁",
+      "description": "Pick one of three gift boxes. One of them might hold a big coin prize.",
+      "cost_coins": 0,
+      "daily_limit": 1,
+      "prizes": [
+        {
+          "label": "Empty box",
+          "coins": 0,
+          "weight": 35
+        },
+        {
+          "label": "15 coins",
+          "coins": 15,
+          "weight": 35
+        },
+        {
+          "label": "40 coins",
+          "coins": 40,
+          "weight": 20
+        },
+        {
+          "label": "120 coins",
+          "coins": 120,
+          "weight": 10
+        }
+      ],
+      "enabled": 1,
+      "sort_order": 2,
+      "created_at": "2025-08-01T10:00:00.000Z",
+      "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "slug": "snake",
+      "name": "Snake",
+      "type": "snake",
+      "emoji": "🐍",
+      "description": "Eat the apples and grow. Coins follow your score, and you can play once a day.",
+      "cost_coins": 0,
+      "daily_limit": 1,
+      "prizes": [
+        {
+          "label": "Nice try",
+          "coins": 5,
+          "min_score": 0
+        },
+        {
+          "label": "5 apples",
+          "coins": 15,
+          "min_score": 5
+        },
+        {
+          "label": "10 apples",
+          "coins": 40,
+          "min_score": 10
+        },
+        {
+          "label": "20 apples",
+          "coins": 100,
+          "min_score": 20
+        },
+        {
+          "label": "35 apples",
+          "coins": 200,
+          "min_score": 35
+        }
+      ],
+      "enabled": 1,
+      "sort_order": 3,
+      "created_at": "2025-08-01T10:00:00.000Z",
+      "updated_at": "2025-08-01T10:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "slug": "toy-cars",
+      "name": "Toy Cars",
+      "type": "cars",
+      "emoji": "🚗",
+      "description": "Steer your toy car past traffic. Drive further to win more coins. Once a day.",
+      "cost_coins": 0,
+      "daily_limit": 1,
+      "prizes": [
+        {
+          "label": "Short drive",
+          "coins": 5,
+          "min_score": 0
+        },
+        {
+          "label": "200 m",
+          "coins": 20,
+          "min_score": 200
+        },
+        {
+          "label": "500 m",
+          "coins": 50,
+          "min_score": 500
+        },
+        {
+          "label": "1 km",
+          "coins": 120,
+          "min_score": 1000
+        },
+        {
+          "label": "2 km",
+          "coins": 250,
+          "min_score": 2000
+        }
+      ],
+      "enabled": 1,
+      "sort_order": 4,
+      "created_at": "2025-08-01T10:00:00.000Z",
+      "updated_at": "2025-08-01T10:00:00.000Z"
+    }
+  ],
+  "game_plays": [
+    {
+      "id": 1,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "game_id": 1,
+      "game_name": "Spin the Wheel",
+      "result": "win",
+      "prize_label": "10 coins",
+      "coins_won": 10,
+      "score": 0,
+      "created_at": "2026-10-13T09:38:08.887Z"
+    },
+    {
+      "id": 2,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "game_id": 2,
+      "game_name": "Mystery Box",
+      "result": "lose",
+      "prize_label": "Empty box",
+      "coins_won": 0,
+      "score": 0,
+      "created_at": "2026-10-13T09:38:19.600Z"
+    }
+  ],
+  "coin_transactions": [
+    {
+      "id": 1,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "type": "signup_bonus",
+      "coins": 25,
+      "balance_after": 25,
+      "reference": "",
+      "note": "Welcome bonus",
+      "created_at": "2026-10-13T09:36:38.589Z"
+    },
+    {
+      "id": 2,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "type": "game_win",
+      "coins": 10,
+      "balance_after": 35,
+      "reference": "play-1",
+      "note": "Won 10 coins on Spin the Wheel",
+      "created_at": "2026-10-13T09:38:08.895Z"
+    }
+  ],
   "newsletter": [],
   "countries": [
     {
@@ -9290,5 +9968,6 @@
       "sort_order": 2
     }
   ],
+  "notifications": [],
   "inquiries": []
 }

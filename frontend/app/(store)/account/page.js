@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, pkr } from "../../../lib/format";
 
@@ -8,11 +9,18 @@ export default function AccountPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [customer, setCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [wallet, setWallet] = useState(null);
   const [error, setError] = useState("");
 
   async function load(token) {
-    const data = await api("/api/auth/orders", { headers: { Authorization: `Bearer ${token}` } });
+    const headers = { Authorization: `Bearer ${token}` };
+    const data = await api("/api/auth/orders", { headers });
     setOrders(data.orders);
+    const me = await api("/api/me", { headers }).catch(() => null);
+    if (me) {
+      setWallet({ coins: me.customer.coins, rules: me.rules });
+      localStorage.setItem("kidlo_customer_profile", JSON.stringify(me.customer));
+    }
   }
 
   useEffect(() => {
@@ -32,6 +40,11 @@ export default function AccountPage() {
       const data = await api(path, { method: "POST", body: form });
       localStorage.setItem("kidlo_customer", data.token);
       localStorage.setItem("kidlo_customer_profile", JSON.stringify(data.customer));
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next && next.startsWith("/") && !next.startsWith("//")) {
+        window.location.assign(next);
+        return;
+      }
       setCustomer(data.customer);
       await load(data.token);
     } catch (err) {
@@ -44,6 +57,7 @@ export default function AccountPage() {
     localStorage.removeItem("kidlo_customer_profile");
     setCustomer(null);
     setOrders([]);
+    setWallet(null);
   }
 
   if (!customer) {
@@ -70,6 +84,13 @@ export default function AccountPage() {
         <button className="btn btn-outline" onClick={logout}>Log out</button>
       </div>
       <p className="sec-sub">Orders placed with {customer.email} show up here. Guest checkouts appear when the same email was used.</p>
+      {wallet && wallet.rules.enabled ? (
+        <div className="coin-wallet account-wallet">
+          <span>🪙</span>
+          <div><small>Kidlo Coins</small><b>{Number(wallet.coins).toLocaleString("en-PK")}</b><em>Worth {pkr(wallet.coins * wallet.rules.coin_value_pkr)} at checkout</em></div>
+          <Link className="btn btn-orange" href="/games">Play & win more</Link>
+        </div>
+      ) : null}
       <div className="table-wrap" style={{ marginTop: 18 }}>
         <table className="data">
           <thead><tr><th>Order</th><th>Status</th><th>City</th><th>Total</th></tr></thead>

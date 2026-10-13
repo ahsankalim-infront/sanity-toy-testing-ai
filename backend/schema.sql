@@ -157,6 +157,10 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `discount` INT NULL,
   `total` INT NULL,
   `coupon_code` VARCHAR(255) NULL,
+  `customer_id` INT NULL,
+  `coins_used` INT NULL,
+  `coins_discount` INT NULL,
+  `coins_refunded` TINYINT NULL,
   `notes` TEXT NULL,
   `created_at` VARCHAR(255) NULL,
   PRIMARY KEY (`id`)
@@ -202,6 +206,52 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `email` VARCHAR(255) NULL,
   `phone` VARCHAR(255) NULL,
   `password_hash` VARCHAR(255) NULL,
+  `coins` INT NULL,
+  `games_blocked` TINYINT NULL,
+  `created_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `games` (
+  `id` INT NULL,
+  `slug` VARCHAR(255) NULL,
+  `name` VARCHAR(255) NULL,
+  `type` VARCHAR(255) NULL,
+  `emoji` VARCHAR(255) NULL,
+  `description` TEXT NULL,
+  `cost_coins` INT NULL,
+  `daily_limit` INT NULL,
+  `prizes` LONGTEXT NULL,
+  `enabled` TINYINT NULL,
+  `sort_order` INT NULL,
+  `created_at` VARCHAR(255) NULL,
+  `updated_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `game_plays` (
+  `id` INT NULL,
+  `customer_id` INT NULL,
+  `customer_name` VARCHAR(255) NULL,
+  `game_id` INT NULL,
+  `game_name` VARCHAR(255) NULL,
+  `result` VARCHAR(255) NULL,
+  `prize_label` VARCHAR(255) NULL,
+  `coins_won` INT NULL,
+  `score` INT NULL,
+  `created_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `coin_transactions` (
+  `id` INT NULL,
+  `customer_id` INT NULL,
+  `customer_name` VARCHAR(255) NULL,
+  `type` VARCHAR(255) NULL,
+  `coins` INT NULL,
+  `balance_after` INT NULL,
+  `reference` VARCHAR(255) NULL,
+  `note` VARCHAR(255) NULL,
   `created_at` VARCHAR(255) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -232,6 +282,17 @@ CREATE TABLE IF NOT EXISTS `cities` (
   `name` VARCHAR(255) NULL,
   `active` TINYINT NULL,
   `sort_order` INT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` INT NULL,
+  `type` VARCHAR(255) NULL,
+  `title` VARCHAR(255) NULL,
+  `body` TEXT NULL,
+  `href` VARCHAR(255) NULL,
+  `read` TINYINT NULL,
+  `created_at` VARCHAR(255) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

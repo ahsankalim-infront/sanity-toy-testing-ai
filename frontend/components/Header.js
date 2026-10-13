@@ -113,6 +113,7 @@ export default function Header({ shell }) {
           <button className="search-go" type="submit">Search</button>
         </form>
         <div className="nav-actions">
+          {sections.coins && Number(sections.coins.enabled ?? 1) ? <Link href="/games" className="icon-btn" title="Play & win Kidlo Coins" onClick={() => setOpen(false)}>🎮</Link> : null}
           <Link href="/wishlist" className="icon-btn" title="Wishlist" onClick={() => setOpen(false)}>❤️{wish.length ? <span className="badge">{wish.length}</span> : null}</Link>
           <Link href="/cart" className="icon-btn" title="Cart" onClick={() => setOpen(false)}>🛒{count ? <span className="badge">{count}</span> : null}</Link>
           <Link href="/account" className="btn btn-teal account-btn" onClick={() => setOpen(false)}>

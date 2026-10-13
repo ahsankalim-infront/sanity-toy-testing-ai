@@ -28,10 +28,17 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [rules, setRules] = useState({ free_shipping_over: 2000, shipping_fee: 199, cod_note: "" });
   const [places, setPlaces] = useState({ countries: [], cities: [] });
+  const [wallet, setWallet] = useState(null);
+  const [useCoins, setUseCoins] = useState(false);
   const payable = Math.max(0, subtotal - discount);
   const freeOver = Number(rules.free_shipping_over) || 2000;
   const shipping = subtotal === 0 || payable >= freeOver ? 0 : Number(rules.shipping_fee);
-  const total = payable + shipping;
+  const coinValue = Number(wallet?.rules.coin_value_pkr) || 0;
+  const coinCap = coinValue ? Math.floor(Math.floor((payable * Number(wallet.rules.max_redeem_percent || 0)) / 100) / coinValue) : 0;
+  const usableCoins = wallet ? Math.min(Number(wallet.coins) || 0, coinCap) : 0;
+  const coinsEligible = Boolean(wallet?.rules.enabled) && usableCoins > 0 && usableCoins >= Number(wallet.rules.min_redeem_coins || 0);
+  const coinDiscount = useCoins && coinsEligible ? Math.round(usableCoins * coinValue) : 0;
+  const total = payable - coinDiscount + shipping;
   const untilFree = Math.max(0, freeOver - payable);
 
   useEffect(() => {
@@ -51,6 +58,12 @@ export default function CheckoutPage() {
         }));
       }
     } catch { /* guest checkout */ }
+    const token = localStorage.getItem("kidlo_customer");
+    if (token) {
+      api("/api/me", { headers: { Authorization: `Bearer ${token}` } })
+        .then((me) => setWallet({ coins: me.customer.coins, rules: me.rules }))
+        .catch(() => {});
+    }
   }, []);
 
   function set(key, value) {
@@ -76,9 +89,11 @@ export default function CheckoutPage() {
     setPlacing(true);
     setMessage("");
     try {
+      const token = localStorage.getItem("kidlo_customer");
       const result = await api("/api/orders", {
         method: "POST",
-        body: { ...form, country_code: form.country_code, items: cart.map((item) => ({ product_id: item.id, qty: item.qty })) },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: { ...form, country_code: form.country_code, use_coins: coinDiscount ? usableCoins : 0, items: cart.map((item) => ({ product_id: item.id, qty: item.qty })) },
       });
       setOrder(result.order);
       clear();
@@ -211,9 +226,27 @@ export default function CheckoutPage() {
               </div>
               {message ? <p className={messageOk ? "checkout-note good" : "checkout-note bad"}>{message}</p> : null}
 
+              {wallet?.rules.enabled ? (
+                <div className={`coin-redeem ${coinsEligible ? "" : "off"}`}>
+                  <label>
+                    <input type="checkbox" checked={useCoins && coinsEligible} disabled={!coinsEligible} onChange={(event) => setUseCoins(event.target.checked)} />
+                    <span>
+                      <strong>🪙 Use {coinsEligible ? usableCoins : 0} Kidlo Coins</strong>
+                      <small>
+                        {coinsEligible
+                          ? `Save ${pkr(Math.round(usableCoins * coinValue))}. You have ${wallet.coins} coins.`
+                          : `You have ${wallet.coins} coins. Minimum ${wallet.rules.min_redeem_coins} coins, up to ${wallet.rules.max_redeem_percent}% of the order.`}
+                      </small>
+                    </span>
+                  </label>
+                  <Link href="/games">Win more</Link>
+                </div>
+              ) : null}
+
               <div className="checkout-totals">
                 <div className="summary-line"><span>Subtotal</span><span>{pkr(subtotal)}</span></div>
                 <div className="summary-line"><span>Discount</span><span>{discount ? `-${pkr(discount)}` : pkr(0)}</span></div>
+                {coinDiscount ? <div className="summary-line"><span>Kidlo Coins</span><span>-{pkr(coinDiscount)}</span></div> : null}
                 <div className="summary-line"><span>Delivery</span><span>{shipping ? pkr(shipping) : "Free"}</span></div>
                 <div className="summary-line total"><span>Total</span><span>{pkr(total)}</span></div>
               </div>

@@ -6,6 +6,7 @@ import ProductCard from "./ProductCard";
 import ProductMedia from "./ProductMedia";
 import { api, pkr } from "../lib/format";
 import { useCart } from "../context/CartContext";
+import { WhatsAppIcon, whatsappLink } from "./WhatsApp";
 
 export default function HomePage({ data }) {
   const sections = Object.fromEntries((data.sections || []).map((row) => [row.section_key, row.payload]));
@@ -298,6 +299,31 @@ export default function HomePage({ data }) {
               </Link>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {sections.play_banner && sections.coins && Number(sections.coins.enabled ?? 1) ? (
+        <section className="play-banner">
+          <div>
+            <span className="sec-label" style={{ background: "rgba(255,255,255,.2)", color: "white" }}>🎮 {sections.play_banner.label}</span>
+            <h2 className="sec-head" style={{ color: "white" }}>{sections.play_banner.title}</h2>
+            <p>{sections.play_banner.text}</p>
+            <Link className="btn btn-dark" href="/games">{sections.play_banner.button || "Play now"} →</Link>
+          </div>
+          <div className="play-banner-art" aria-hidden><span>🎡</span><span>🪙</span><span>🎁</span></div>
+        </section>
+      ) : null}
+
+      {sections.whatsapp && whatsappLink(sections.whatsapp) ? (
+        <section className="wa-banner">
+          <div className="wa-banner-icon"><WhatsAppIcon /></div>
+          <div>
+            <span className="sec-label" style={{ background: "#DCF8E6", color: "#128C4A" }}>💬 {sections.whatsapp.banner_label || "WhatsApp"}</span>
+            <h2 className="sec-head">{sections.whatsapp.banner_title}</h2>
+            <p className="sec-sub">{sections.whatsapp.banner_text}</p>
+            {sections.whatsapp.hours ? <p className="muted">{sections.whatsapp.hours}</p> : null}
+          </div>
+          <a className="btn btn-whatsapp" href={whatsappLink(sections.whatsapp)} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /> {sections.whatsapp.button_label || "Chat on WhatsApp"}</a>
         </section>
       ) : null}
 

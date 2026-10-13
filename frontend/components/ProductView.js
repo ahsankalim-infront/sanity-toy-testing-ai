@@ -6,6 +6,7 @@ import ProductCard from "./ProductCard";
 import { api, discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
 import ProductMedia from "./ProductMedia";
+import { WhatsAppProductButton } from "./WhatsApp";
 
 function remember(id) {
   try {
@@ -81,6 +82,7 @@ export default function ProductView({ slug, initial = null }) {
               </div>
               <button className="btn btn-orange" disabled={product.stock <= 0} onClick={() => add(product, qty)}>🛒 Add to Cart</button>
               <button className="btn btn-outline" onClick={() => toggleWish(product)}>{wished(product.id) ? "❤️ Saved" : "🤍 Wishlist"}</button>
+              <WhatsAppProductButton product={product} />
             </div>
           </div>
         </div>

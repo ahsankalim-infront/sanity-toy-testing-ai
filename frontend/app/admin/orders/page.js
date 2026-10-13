@@ -7,7 +7,7 @@ export default function OrdersAdmin() {
     <ResourceManager
       table="orders"
       title="Orders"
-      description="Review customers, delivery cities, payment methods, and fulfilment status."
+      description="Review customers, delivery cities, payment methods, and fulfilment status. Setting an order to Cancelled returns any Kidlo Coins used on it to the customer."
       columns={["city", "status", "total", "payment_method"]}
       identity={{ title: "order_no", subtitle: "customer_name" }}
       search={["order_no", "customer_name", "phone", "email", "city"]}

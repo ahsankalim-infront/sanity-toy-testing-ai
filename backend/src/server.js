@@ -57,7 +57,11 @@ const uploadProductImage = multer({
 });
 
 const PUBLIC_TABLES = ["categories", "products", "sections", "pages", "blog_posts", "reviews", "coupons"];
-const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities", "seo_entries", "media_files"];
+const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities", "seo_entries", "media_files", "notifications", "games", "game_plays", "coin_transactions"];
+const GAME_TYPES = ["spin", "box", "snake", "cars"];
+const SKILL_TYPES = new Set(["snake", "cars"]);
+const SKILL_PLAY_MS = 12 * 60 * 1000;
+const SKILL_PACE_MS = { snake: 80, cars: 18 };
 
 function sign(payload, days = 7) {
   const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + days * 86400000 })).toString("base64url");
@@ -132,6 +136,147 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+function currentCustomer(req) {
+  const user = readToken(req.headers.authorization);
+  if (!user || user.role !== "customer") return null;
+  return store.get("customers", user.id);
+}
+
+function requireCustomer(req, res, next) {
+  const customer = currentCustomer(req);
+  if (!customer) return res.status(401).json({ error: "Log in to continue" });
+  req.customer = customer;
+  next();
+}
+
+function coinRules() {
+  const row = sectionMap().coins;
+  const payload = row?.payload || {};
+  return {
+    enabled: Boolean(row?.enabled) && Boolean(Number(payload.enabled ?? 1)),
+    coin_value_pkr: Math.max(0, Number(payload.coin_value_pkr ?? 1)),
+    max_redeem_percent: Math.max(0, Math.min(100, Number(payload.max_redeem_percent ?? 20))),
+    min_redeem_coins: Math.max(0, Number(payload.min_redeem_coins ?? 0)),
+    signup_bonus: Math.max(0, Number(payload.signup_bonus ?? 0)),
+    daily_play_limit: Math.max(0, Number(payload.daily_play_limit ?? 0)),
+  };
+}
+
+function publicCustomer(customer) {
+  return { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, coins: Number(customer.coins) || 0 };
+}
+
+const customerLocks = new Map();
+function withCustomerLock(id, task) {
+  const key = Number(id);
+  const previous = customerLocks.get(key) || Promise.resolve();
+  const next = previous.then(task);
+  const settled = next.catch(() => {}).finally(() => { if (customerLocks.get(key) === settled) customerLocks.delete(key); });
+  customerLocks.set(key, settled);
+  return next;
+}
+
+async function addCoins(customerId, coins, type, reference = "", note = "") {
+  const customer = store.get("customers", customerId);
+  if (!customer) throw new Error("Customer not found");
+  const balance = Math.max(0, (Number(customer.coins) || 0) + Number(coins));
+  await store.update("customers", customer.id, { coins: balance });
+  await store.insert("coin_transactions", {
+    customer_id: customer.id,
+    customer_name: customer.name,
+    type,
+    coins: Number(coins),
+    balance_after: balance,
+    reference,
+    note,
+    created_at: new Date().toISOString(),
+  });
+  return balance;
+}
+
+function pickPrize(prizes) {
+  const total = prizes.reduce((sum, prize) => sum + Math.max(0, Number(prize.weight) || 0), 0);
+  if (total <= 0) return 0;
+  let roll = crypto.randomInt(total);
+  for (let index = 0; index < prizes.length; index += 1) {
+    roll -= Math.max(0, Number(prizes[index].weight) || 0);
+    if (roll < 0) return index;
+  }
+  return prizes.length - 1;
+}
+
+function playsToday(customerId, gameId) {
+  const today = dayKey(Date.now());
+  return store.all("game_plays").filter((row) => Number(row.customer_id) === Number(customerId)
+    && row.result !== "playing"
+    && (gameId === undefined || Number(row.game_id) === Number(gameId))
+    && dayKey(row.created_at) === today).length;
+}
+
+function publicGame(game, customerId) {
+  const prizes = Array.isArray(game.prizes) ? game.prizes : [];
+  const skill = SKILL_TYPES.has(game.type);
+  return {
+    id: game.id,
+    slug: game.slug,
+    name: game.name,
+    type: game.type,
+    emoji: game.emoji,
+    description: game.description,
+    cost_coins: game.cost_coins,
+    daily_limit: game.daily_limit,
+    prizes: prizes.map((prize) => ({
+      label: prize.label,
+      coins: Number(prize.coins) || 0,
+      ...(skill ? { min_score: Number(prize.min_score) || 0 } : {}),
+    })),
+    played_today: customerId ? playsToday(customerId, game.id) : 0,
+  };
+}
+
+function prizeForScore(prizes, score) {
+  const ranked = prizes
+    .map((prize, index) => ({ prize, index, min: Number(prize.min_score) || 0 }))
+    .filter((item) => item.min <= score)
+    .sort((a, b) => b.min - a.min || (Number(b.prize.coins) || 0) - (Number(a.prize.coins) || 0));
+  return ranked[0] || { prize: prizes[0], index: 0 };
+}
+
+async function closeStalePlays(customerId) {
+  const now = Date.now();
+  for (const row of store.all("game_plays")) {
+    if (Number(row.customer_id) !== Number(customerId) || row.result !== "playing") continue;
+    if (now - new Date(row.created_at).getTime() < SKILL_PLAY_MS) continue;
+    await store.update("game_plays", row.id, { result: "lose", prize_label: "Left unfinished", coins_won: 0, score: 0 });
+  }
+}
+
+async function finishSkillPlay(customer, game, prizes, body) {
+  const play = store.get("game_plays", body.play_id);
+  if (!play || Number(play.customer_id) !== Number(customer.id) || Number(play.game_id) !== Number(game.id) || play.result !== "playing") {
+    throw Object.assign(new Error("This game is no longer open"), { status: 400 });
+  }
+  const elapsed = Date.now() - new Date(play.created_at).getTime();
+  if (elapsed > SKILL_PLAY_MS) {
+    await store.update("game_plays", play.id, { result: "lose", prize_label: "Left unfinished", coins_won: 0, score: 0 });
+    throw Object.assign(new Error("This play took too long and was closed. Come back tomorrow."), { status: 400 });
+  }
+  const cap = Math.floor(elapsed / SKILL_PACE_MS[game.type]) + 1;
+  const score = Math.max(0, Math.min(5000, Math.floor(Number(body.score) || 0), cap));
+  const picked = prizeForScore(prizes, score);
+  const won = Math.max(0, Number(picked.prize.coins) || 0);
+  const unit = game.type === "cars" ? "m" : "apples";
+  await store.update("game_plays", play.id, {
+    result: won ? "win" : "lose",
+    prize_label: `${picked.prize.label} · ${score} ${unit}`,
+    coins_won: won,
+    score,
+  });
+  let balance = Number(store.get("customers", customer.id).coins) || 0;
+  if (won) balance = await addCoins(customer.id, won, "game_win", `play-${play.id}`, `${picked.prize.label} on ${game.name} (${score} ${unit})`);
+  return { prize: { label: picked.prize.label, coins: won }, score, balance, played_today: playsToday(customer.id, game.id) };
+}
+
 function digits(value) {
   return String(value || "").replace(/\D/g, "").replace(/^92/, "0");
 }
@@ -140,6 +285,17 @@ function normalizeSeoPath(value) {
   let pathValue = String(value || "/").trim();
   if (!pathValue.startsWith("/")) pathValue = `/${pathValue}`;
   return pathValue.length > 1 ? pathValue.replace(/\/+$/, "") : pathValue;
+}
+
+async function notify({ type, title, body, href }) {
+  await store.insert("notifications", {
+    type,
+    title,
+    body: body || "",
+    href: href || "/admin",
+    read: 0,
+    created_at: new Date().toISOString(),
+  });
 }
 
 function nationalNumber(raw, country) {
@@ -175,6 +331,47 @@ async function upgradeData() {
     let nextId = currentSeo.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0);
     store.data.seo_entries = currentSeo.concat(missingSeo.map((row) => ({ ...row, id: ++nextId })));
     await store.persist("seo_entries");
+  }
+  const seed = buildSeed();
+  const sectionKeys = new Set(store.all("sections").map((row) => row.section_key));
+  const missingSections = seed.sections.filter((row) => !sectionKeys.has(row.section_key));
+  if (missingSections.length) {
+    let nextId = store.all("sections").reduce((max, row) => Math.max(max, Number(row.id) || 0), 0);
+    store.data.sections = store.all("sections").concat(missingSections.map((row) => ({ ...row, id: ++nextId, sort_order: nextId })));
+    await store.persist("sections");
+  }
+  if (!store.data.meta.games_seeded) {
+    if (!store.all("games").length) {
+      store.data.games = seed.games;
+      await store.persist("games");
+    }
+    store.data.meta.games_seeded = 1;
+    store.writeFile(store.data);
+  }
+  const knownSlugs = new Set(store.all("games").map((row) => row.slug));
+  const missingGames = seed.games.filter((row) => !knownSlugs.has(row.slug));
+  if (missingGames.length) {
+    let nextId = store.all("games").reduce((max, row) => Math.max(max, Number(row.id) || 0), 0);
+    store.data.games = store.all("games").concat(missingGames.map((row) => ({ ...row, id: ++nextId })));
+    await store.persist("games");
+  }
+  if (!store.data.meta.chance_daily_once) {
+    store.data.games = store.all("games").map((row) => (row.type === "spin" || row.type === "box" ? { ...row, daily_limit: 1 } : row));
+    store.data.meta.chance_daily_once = 1;
+    await store.persist("games");
+  }
+  if (!store.data.meta.coins_per_game_limit) {
+    const coins = store.all("sections").find((row) => row.section_key === "coins");
+    if (coins && Number(coins.payload?.daily_play_limit) === 3) {
+      await store.update("sections", coins.id, { payload: { ...coins.payload, daily_play_limit: 0 } });
+    }
+    const banner = store.all("sections").find((row) => row.section_key === "play_banner");
+    const freshBanner = seed.sections.find((row) => row.section_key === "play_banner");
+    if (banner && freshBanner && banner.payload?.text?.includes("mystery box")) {
+      await store.update("sections", banner.id, { payload: { ...banner.payload, text: freshBanner.payload.text } });
+    }
+    store.data.meta.coins_per_game_limit = 1;
+    store.writeFile(store.data);
   }
   if (!store.data.meta.demo_orders && store.all("orders").length <= 1 && process.env.DEMO_ORDERS !== "0") {
     const rules = sectionMap().commerce?.payload || {};
@@ -392,7 +589,10 @@ async function main() {
     const email = String(req.body.email || "").trim().toLowerCase();
     if (!email.includes("@")) return res.status(400).json({ error: "Enter a valid email" });
     const existing = store.all("newsletter").find((row) => row.email === email);
-    if (!existing) await store.insert("newsletter", { email, created_at: new Date().toISOString() });
+    if (!existing) {
+      await store.insert("newsletter", { email, created_at: new Date().toISOString() });
+      await notify({ type: "newsletter", title: "New newsletter subscriber", body: email, href: "/admin/newsletter" });
+    }
     res.json({ ok: true });
   });
 
@@ -408,6 +608,7 @@ async function main() {
       status: "new",
       created_at: new Date().toISOString(),
     });
+    await notify({ type: "inquiry", title: `New ${row.type} message`, body: `${row.name}: ${row.message}`, href: "/admin/inquiries" });
     res.json({ ok: true, id: row.id });
   });
 
@@ -432,6 +633,7 @@ async function main() {
       const rating = list.reduce((sum, item) => sum + Number(item.stars), 0) / list.length;
       await store.update("products", product.id, { rating: Math.round(rating * 10) / 10, review_count: list.length });
     }
+    await notify({ type: "review", title: `New review from ${author}`, body: text, href: "/admin/reviews" });
     res.json({ ok: true, review: row });
   });
 
@@ -479,10 +681,34 @@ async function main() {
       }
     }
     const shipping = subtotal - discount >= Number(rules.free_shipping_over || 2000) ? 0 : Number(rules.shipping_fee || 0);
-    const total = Math.max(0, subtotal - discount + shipping);
     const seq = store.all("orders").reduce((max, row) => Math.max(max, Number(String(row.order_no).replace(/\D/g, "")) || 1000), 1000) + 1;
+    const orderNo = `KD${seq}`;
+    const customer = currentCustomer(req);
+    const requestedCoins = Math.max(0, Math.floor(Number(body.use_coins) || 0));
+    let coinsUsed = 0;
+    let coinsDiscount = 0;
+    if (customer && requestedCoins) {
+      const coinRule = coinRules();
+      if (!coinRule.enabled || !coinRule.coin_value_pkr) return res.status(400).json({ error: "Kidlo Coins cannot be used right now" });
+      try {
+        await withCustomerLock(customer.id, async () => {
+          const fresh = store.get("customers", customer.id);
+          const maxCoins = Math.floor(Math.floor((subtotal - discount) * coinRule.max_redeem_percent / 100) / coinRule.coin_value_pkr);
+          const usable = Math.min(requestedCoins, Number(fresh.coins) || 0, maxCoins);
+          if (usable < coinRule.min_redeem_coins) {
+            throw new Error(`Use at least ${coinRule.min_redeem_coins} coins, up to ${coinRule.max_redeem_percent}% of the order`);
+          }
+          coinsUsed = usable;
+          coinsDiscount = Math.round(usable * coinRule.coin_value_pkr);
+          await addCoins(customer.id, -usable, "order_redeem", orderNo, `Used on order ${orderNo}`);
+        });
+      } catch (err) {
+        return res.status(400).json({ error: err.message });
+      }
+    }
+    const total = Math.max(0, subtotal - discount - coinsDiscount + shipping);
     const order = await store.insert("orders", {
-      order_no: `KD${seq}`,
+      order_no: orderNo,
       customer_name: body.customer_name,
       email: body.email || "",
       phone,
@@ -498,6 +724,10 @@ async function main() {
       discount,
       total,
       coupon_code: couponCode,
+      customer_id: customer?.id || 0,
+      coins_used: coinsUsed,
+      coins_discount: coinsDiscount,
+      coins_refunded: 0,
       notes: body.notes || "",
       created_at: new Date().toISOString(),
     });
@@ -513,12 +743,17 @@ async function main() {
         qty: line.qty,
       });
       savedItems.push(saved);
+      const nextStock = line.product.stock - line.qty;
       await store.update("products", line.product.id, {
-        stock: line.product.stock - line.qty,
+        stock: nextStock,
         sold: Number(line.product.sold) + line.qty,
       });
+      if (nextStock <= 5) {
+        await notify({ type: "stock", title: `${line.product.name} is low on stock`, body: `${nextStock} left`, href: "/admin/products" });
+      }
     }
-    res.json({ order, items: savedItems });
+    await notify({ type: "order", title: `Order ${order.order_no} placed`, body: `${order.customer_name} · ${order.city} · PKR ${order.total}${coinsUsed ? ` · ${coinsUsed} coins used` : ""}`, href: "/admin/orders" });
+    res.json({ order, items: savedItems, coins: customer ? Number(store.get("customers", customer.id).coins) || 0 : null });
   });
 
   app.post("/api/orders/track", (req, res) => {
@@ -540,10 +775,16 @@ async function main() {
       email: String(email).toLowerCase(),
       phone: phone || "",
       password_hash: hashPassword(password),
+      coins: 0,
+      games_blocked: 0,
       created_at: new Date().toISOString(),
     });
+    const rules = coinRules();
+    if (rules.enabled && rules.signup_bonus) {
+      await addCoins(customer.id, rules.signup_bonus, "signup_bonus", "", "Welcome bonus");
+    }
     const token = sign({ id: customer.id, role: "customer", name: customer.name });
-    res.json({ token, customer: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone } });
+    res.json({ token, customer: publicCustomer(store.get("customers", customer.id)) });
   });
 
   app.post("/api/auth/login", (req, res) => {
@@ -553,7 +794,92 @@ async function main() {
       return res.status(401).json({ error: "Email or password is incorrect" });
     }
     const token = sign({ id: customer.id, role: "customer", name: customer.name });
-    res.json({ token, customer: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone } });
+    res.json({ token, customer: publicCustomer(customer) });
+  });
+
+  app.get("/api/me", requireCustomer, (req, res) => {
+    const customer = req.customer;
+    const transactions = store.all("coin_transactions")
+      .filter((row) => Number(row.customer_id) === Number(customer.id))
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+      .slice(0, 30);
+    res.json({ customer: publicCustomer(customer), rules: coinRules(), transactions, plays_today: playsToday(customer.id) });
+  });
+
+  app.get("/api/games", (req, res) => {
+    const customer = currentCustomer(req);
+    const games = store.all("games")
+      .filter((row) => row.enabled && GAME_TYPES.includes(row.type))
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((row) => publicGame(row, customer?.id));
+    res.json({
+      rules: coinRules(),
+      games,
+      customer: customer ? publicCustomer(customer) : null,
+      plays_today: customer ? playsToday(customer.id) : 0,
+      blocked: Boolean(customer?.games_blocked),
+    });
+  });
+
+  app.post("/api/games/:id/play", requireCustomer, async (req, res) => {
+    const rules = coinRules();
+    if (!rules.enabled) return res.status(403).json({ error: "Kidlo Coins games are paused right now" });
+    if (req.customer.games_blocked) return res.status(403).json({ error: "Games are turned off for this account. Contact support for help." });
+    const game = store.all("games").find((row) => Number(row.id) === Number(req.params.id) && row.enabled && GAME_TYPES.includes(row.type));
+    if (!game) return res.status(404).json({ error: "Game not found" });
+    const prizes = Array.isArray(game.prizes) ? game.prizes : [];
+    if (!prizes.length) return res.status(400).json({ error: "This game has no prizes set up yet" });
+    try {
+      const result = await withCustomerLock(req.customer.id, async () => {
+        const customer = store.get("customers", req.customer.id);
+        if (SKILL_TYPES.has(game.type) && req.body?.action === "finish") {
+          return finishSkillPlay(customer, game, prizes, req.body);
+        }
+        await closeStalePlays(customer.id);
+        if (SKILL_TYPES.has(game.type)) {
+          const open = store.all("game_plays").find((row) => Number(row.customer_id) === Number(customer.id) && Number(row.game_id) === Number(game.id) && row.result === "playing");
+          if (open) return { play_id: open.id, resumed: true };
+        }
+        if (game.daily_limit && playsToday(customer.id, game.id) >= game.daily_limit) {
+          throw Object.assign(new Error(`You have used all ${game.daily_limit} plays of ${game.name} today. Come back tomorrow.`), { status: 429 });
+        }
+        if (rules.daily_play_limit && playsToday(customer.id) >= rules.daily_play_limit) {
+          throw Object.assign(new Error(`You have used all ${rules.daily_play_limit} game plays for today. Come back tomorrow.`), { status: 429 });
+        }
+        const cost = Math.max(0, Number(game.cost_coins) || 0);
+        if (cost > (Number(customer.coins) || 0)) {
+          throw Object.assign(new Error(`You need ${cost} coins to play ${game.name}`), { status: 400 });
+        }
+        if (cost) await addCoins(customer.id, -cost, "game_entry", game.slug, `Played ${game.name}`);
+        if (SKILL_TYPES.has(game.type)) {
+          const play = await store.insert("game_plays", {
+            customer_id: customer.id, customer_name: customer.name, game_id: game.id, game_name: game.name,
+            result: "playing", prize_label: "", coins_won: 0, score: 0, created_at: new Date().toISOString(),
+          });
+          return { play_id: play.id, resumed: false };
+        }
+        const index = pickPrize(prizes);
+        const prize = prizes[index];
+        const won = Math.max(0, Number(prize.coins) || 0);
+        const play = await store.insert("game_plays", {
+          customer_id: customer.id,
+          customer_name: customer.name,
+          game_id: game.id,
+          game_name: game.name,
+          result: won ? "win" : "lose",
+          prize_label: prize.label,
+          coins_won: won,
+          score: 0,
+          created_at: new Date().toISOString(),
+        });
+        let balance = Number(store.get("customers", customer.id).coins) || 0;
+        if (won) balance = await addCoins(customer.id, won, "game_win", `play-${play.id}`, `Won ${prize.label} on ${game.name}`);
+        return { index, prize: { label: prize.label, coins: won }, balance, played_today: playsToday(customer.id, game.id) };
+      });
+      res.json(result);
+    } catch (err) {
+      res.status(err.status || 500).json({ error: err.message || "The game could not start" });
+    }
   });
 
   app.get("/api/auth/orders", (req, res) => {
@@ -561,7 +887,7 @@ async function main() {
     if (!user || user.role !== "customer") return res.status(401).json({ error: "Login required" });
     const customer = store.get("customers", user.id);
     if (!customer) return res.status(401).json({ error: "Login required" });
-    const orders = store.all("orders").filter((row) => row.email.toLowerCase() === customer.email.toLowerCase());
+    const orders = store.all("orders").filter((row) => Number(row.customer_id) === Number(customer.id) || row.email.toLowerCase() === customer.email.toLowerCase());
     res.json({
       orders: orders.map((order) => ({
         ...order,
@@ -599,6 +925,37 @@ async function main() {
     await store.ensureMysql();
     const days = Math.max(1, Math.min(365, Number(req.query.days) || 30));
     res.json(buildReport(days));
+  });
+
+  app.post("/api/admin/customers/:id/coins", requireAdmin, async (req, res) => {
+    const customer = store.get("customers", req.params.id);
+    if (!customer) return res.status(404).json({ error: "Customer not found" });
+    const delta = Math.trunc(Number(req.body?.coins) || 0);
+    if (!delta) return res.status(400).json({ error: "Enter a positive or negative coin amount" });
+    const balance = await withCustomerLock(customer.id, () => addCoins(customer.id, delta, "admin_adjust", req.user.name || "admin", String(req.body?.note || "Adjusted by admin").slice(0, 240)));
+    res.json({ balance });
+  });
+
+  app.get("/api/admin/coins/summary", requireAdmin, (_req, res) => {
+    const customers = store.all("customers");
+    const tx = store.all("coin_transactions");
+    const plays = store.all("game_plays");
+    const sum = (rows) => rows.reduce((total, row) => total + Number(row.coins || 0), 0);
+    res.json({
+      rules: coinRules(),
+      outstanding: customers.reduce((total, row) => total + (Number(row.coins) || 0), 0),
+      issued: sum(tx.filter((row) => Number(row.coins) > 0)),
+      redeemed: -sum(tx.filter((row) => row.type === "order_redeem")),
+      plays: plays.length,
+      wins: plays.filter((row) => row.result === "win").length,
+      players: new Set(plays.map((row) => row.customer_id)).size,
+    });
+  });
+
+  app.post("/api/admin/notifications/read-all", requireAdmin, async (_req, res) => {
+    store.data.notifications = store.all("notifications").map((row) => ({ ...row, read: 1 }));
+    await store.persist("notifications");
+    res.json({ ok: true });
   });
 
   app.get("/api/admin/:table", requireAdmin, (req, res) => {
@@ -640,6 +997,9 @@ async function main() {
       if (!input.title || !input.description) return res.status(400).json({ error: "SEO title and description are required" });
       if (store.all("seo_entries").some((row) => row.path === input.path)) return res.status(409).json({ error: "An SEO entry already exists for this path" });
     }
+    if (table === "games" && !GAME_TYPES.includes(input.type)) {
+      return res.status(400).json({ error: `Game type must be one of: ${GAME_TYPES.join(", ")}` });
+    }
     if (input.password) {
       input.password_hash = hashPassword(input.password);
       delete input.password;
@@ -661,15 +1021,34 @@ async function main() {
         return res.status(409).json({ error: "An SEO entry already exists for this path" });
       }
     }
+    if (table === "games" && input.type && !GAME_TYPES.includes(input.type)) {
+      return res.status(400).json({ error: `Game type must be one of: ${GAME_TYPES.join(", ")}` });
+    }
     if (input.password) {
       input.password_hash = hashPassword(input.password);
       delete input.password;
     } else {
       delete input.password;
     }
-    const row = await store.update(table, req.params.id, input);
-    if (!row) return res.status(404).json({ error: "Not found" });
-    res.json({ row });
+    const before = store.get(table, req.params.id);
+    if (!before) return res.status(404).json({ error: "Not found" });
+    let coinDelta = 0;
+    if (table === "customers" && input.coins !== undefined) {
+      coinDelta = Math.trunc(Number(input.coins) || 0) - (Number(before.coins) || 0);
+      delete input.coins;
+    }
+    let row = await store.update(table, req.params.id, input);
+    if (coinDelta) {
+      await withCustomerLock(row.id, () => addCoins(row.id, coinDelta, "admin_adjust", req.user.name || "admin", "Balance edited by admin"));
+      row = store.get(table, row.id);
+    }
+    if (table === "orders" && row.status === "Cancelled" && before.status !== "Cancelled" && row.coins_used && !row.coins_refunded && row.customer_id) {
+      if (store.get("customers", row.customer_id)) {
+        await withCustomerLock(row.customer_id, () => addCoins(row.customer_id, row.coins_used, "order_refund", row.order_no, `Refund for cancelled order ${row.order_no}`));
+      }
+      row = await store.update("orders", row.id, { coins_refunded: 1 });
+    }
+    res.json({ row: stripSecrets([row])[0] });
   });
 
   app.delete("/api/admin/:table/:id", requireAdmin, async (req, res) => {

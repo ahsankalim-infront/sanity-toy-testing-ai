@@ -394,6 +394,33 @@ table.data th{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:
   .admin-form-grid,.admin-record{grid-template-columns:1fr}
   .admin-record-form-head{align-items:flex-start;flex-direction:column}
 }
+.admin-topbar{display:none}
+.admin-bell{position:relative;width:42px;height:42px;border-radius:12px;background:white;display:grid;place-items:center;font-size:18px}
+.admin-bell b,.nav-count{min-width:18px;height:18px;border-radius:99px;background:var(--red);color:white;font-size:11px;display:grid;place-items:center;padding:0 5px}
+.admin-bell b{position:absolute;top:-4px;right:-4px}
+.nav-count{margin-left:auto}
+.admin-backdrop{position:fixed;inset:0;border:none;background:rgba(26,26,46,.45);z-index:110}
+.notice-row.unread{border-color:#ffd7b0;background:#fffaf4}
+.notice-row small{display:block;margin-top:4px;color:#aaa;font-weight:750}
+@media(max-width:900px){
+  .admin-shell{display:block}
+  .admin-topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-bottom:1px solid #eee6dc}
+  .admin-topbar .menu-btn{display:inline-flex;align-items:center;justify-content:center}
+  .admin-topbar strong{font-family:'Fredoka One',cursive;color:var(--orange);font-size:22px}
+  .admin-bell{margin-left:auto}
+  .admin-side{position:fixed;z-index:120;top:0;left:0;width:min(300px,88vw);height:100vh;transform:translateX(-105%);transition:transform .2s ease;display:block}
+  .admin-shell.nav-open .admin-side{transform:none}
+  .admin-side a{margin-bottom:4px}
+  .admin-main{padding:16px}
+  .admin-top .sec-head{font-size:28px!important}
+  .seg{width:100%;overflow:auto}
+  .db-status,.kpi-grid{gap:8px}
+}
+@media(max-width:560px){
+  .kpi-grid{grid-template-columns:1fr}
+  .admin-top .row-actions,.admin-top .row-actions .btn{width:100%}
+  .admin-top .row-actions .btn{justify-content:center}
+}
 @media(max-width:600px){
   .products-admin-head,.media-admin-head{align-items:flex-start;flex-direction:column}
   .products-admin-head .row-actions{width:100%}.products-admin-head .btn{flex:1;justify-content:center}
@@ -407,4 +434,146 @@ table.data th{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:
   .article-cover{height:190px}
   .admin-record-meta{grid-template-columns:1fr}
   .admin-record .row-actions{justify-content:flex-end}
+}
+
+.wa-icon{width:22px;height:22px;flex:none}
+.btn-whatsapp{background:#25D366;color:white}
+.btn-whatsapp:hover{background:#1EBE5A}
+.wa-float{position:fixed;right:28px;bottom:90px;z-index:501;display:flex;align-items:center;gap:10px;background:#25D366;color:white;border-radius:50px;padding:10px 18px 10px 12px;box-shadow:0 8px 24px rgba(37,211,102,.4);transition:transform .15s}
+.wa-float:hover{transform:translateY(-2px)}
+.wa-float .wa-icon{width:30px;height:30px}
+.wa-float-text{display:flex;flex-direction:column;line-height:1.15}
+.wa-float-text b{font-size:14px}
+.wa-float-text small{font-size:11px;opacity:.85;font-weight:700}
+.wa-banner{margin:0 60px 56px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:24px;align-items:center;background:linear-gradient(135deg,#ECFFF3,#F6FFF9);border:1px solid #CDEFD9;border-radius:28px;padding:28px 32px}
+.wa-banner-icon{width:76px;height:76px;border-radius:24px;background:#25D366;color:white;display:grid;place-items:center}
+.wa-banner-icon .wa-icon{width:44px;height:44px}
+.wa-banner .sec-head{font-size:30px;margin:8px 0 4px}
+.wa-banner .btn-whatsapp{padding:14px 24px;font-size:15px}
+.wa-preview{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#F3FFF7;border:1px dashed #9BDDB3;border-radius:16px;padding:14px 16px;margin-top:8px}
+.wa-preview small{font-weight:800;color:#128C4A;text-transform:uppercase;font-size:11px;letter-spacing:.4px}
+.wa-preview p{font-weight:700;margin-top:4px;overflow-wrap:anywhere}
+.toggle-line{display:flex!important;align-items:center;gap:10px;font-weight:800;cursor:pointer}
+.toggle-line input{width:20px!important;height:20px;accent-color:var(--orange);flex:none}
+
+.play-banner{margin:0 60px 56px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;background:linear-gradient(135deg,#FF6B00,#FF4FA3 60%,#7B4FFF);color:white;border-radius:28px;padding:36px 40px;overflow:hidden}
+.play-banner p{font-weight:700;opacity:.9;margin:6px 0 18px;max-width:560px}
+.play-banner-art{display:flex;gap:12px;font-size:64px}
+.play-banner-art span{animation:float-bob 3s ease-in-out infinite}
+.play-banner-art span:nth-child(2){animation-delay:.4s}.play-banner-art span:nth-child(3){animation-delay:.8s}
+@keyframes float-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.games-hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.coin-wallet{display:flex;align-items:center;gap:14px;background:white;border-radius:20px;padding:14px 20px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.coin-wallet>span{font-size:40px}
+.coin-wallet small{display:block;font-weight:800;color:#999;font-size:12px;text-transform:uppercase}
+.coin-wallet b{display:block;font-family:'Fredoka One',cursive;font-size:32px;color:var(--orange);line-height:1.1}
+.coin-wallet em{font-style:normal;font-weight:700;color:#777;font-size:13px}
+.account-wallet{margin-top:18px;flex-wrap:wrap}
+.account-wallet .btn{margin-left:auto}
+.coin-rules{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin-top:16px}
+.coin-rules li{background:rgba(255,255,255,.75);border-radius:50px;padding:6px 14px;font-weight:800;font-size:13px}
+.games-login{text-align:center;max-width:620px;margin:0 auto;padding:36px}
+.games-login .big{font-size:56px}
+.games-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:flex-start}
+.game-picker{display:grid;gap:10px}
+.game-picker button{display:flex;gap:12px;align-items:center;text-align:left;border:2px solid #EEE7DD;background:white;border-radius:18px;padding:14px;font-family:inherit;cursor:pointer}
+.game-picker button.on{border-color:var(--orange);background:#FFF7EE}
+.game-picker strong{display:block;font-size:16px}
+.game-picker small{display:block;color:#888;font-weight:700;font-size:12px;margin-top:2px}
+.game-emoji{font-size:34px}
+.game-stage header{margin-bottom:12px}
+.game-stage h2{font-family:'Fredoka One',cursive;font-size:28px}
+.wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;position:relative;padding-top:18px}
+.wheel-pointer{position:absolute;top:0;z-index:2;font-size:34px;color:var(--dark);filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
+.wheel{position:relative;width:min(380px,82vw);aspect-ratio:1;border-radius:50%;border:8px solid white;box-shadow:0 10px 34px rgba(0,0,0,.15);transition:transform 4.2s cubic-bezier(.17,.67,.12,1)}
+.wheel-label{position:absolute;left:50%;top:0;height:50%;width:0;transform-origin:bottom center;display:flex;justify-content:center}
+.wheel-label em{font-style:normal;font-weight:900;font-size:clamp(10px,2.6vw,14px);color:white;text-shadow:0 1px 2px rgba(0,0,0,.35);margin-top:14px;white-space:nowrap;writing-mode:vertical-rl;transform:rotate(180deg)}
+.wheel-hub{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:white;display:grid;place-items:center;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.game-play-btn{padding:14px 34px;font-size:16px}
+.game-play-btn:disabled,.mystery-box:disabled{opacity:.5;cursor:not-allowed}
+.boxes-wrap{text-align:center}
+.boxes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:14px}
+.mystery-box{border:none;background:linear-gradient(160deg,#FFF3E0,#FFE1EF);border-radius:22px;padding:26px 10px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .2s,opacity .2s}
+.mystery-box:hover:not(:disabled){transform:translateY(-4px)}
+.box-face{font-size:clamp(46px,9vw,72px)}
+.box-label{font-weight:900}
+.mystery-box.shake{animation:box-shake .5s ease-in-out infinite}
+.mystery-box.open{background:linear-gradient(160deg,#FFF6C8,#FFE08A);transform:scale(1.05)}
+.mystery-box.dim{opacity:.45}
+@keyframes box-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.game-result{margin-top:18px;border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:4px;font-weight:700}
+.game-result b{font-size:18px}
+.game-result.win{background:#EDFFD9;color:#2d6a00}
+.game-result.lose{background:#FFF3E0;color:#7a4a12}
+.coin-history{margin-top:22px}
+.coin-history h2{font-family:'Fredoka One',cursive;font-size:24px;margin-bottom:10px}
+.coin-history ul{list-style:none}
+.coin-history li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #EEE7DD}
+.coin-history li span{min-width:0}
+.coin-history small{display:block;color:#999;font-weight:700;font-size:12px;overflow-wrap:anywhere}
+.coin-history .plus,.coin-plus{color:#2f7a00}
+.coin-history .minus,.coin-minus{color:var(--red)}
+.coin-redeem{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FFF8E6;border:1px solid #FFE2A8;border-radius:14px;padding:12px 14px;margin:12px 0}
+.coin-redeem.off{opacity:.7}
+.coin-redeem label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;min-width:0}
+.coin-redeem input{width:18px;height:18px;margin-top:2px;accent-color:var(--orange);flex:none}
+.coin-redeem strong{display:block;font-size:14px}
+.coin-redeem small{display:block;color:#7a6a4a;font-weight:700;font-size:12px}
+.coin-redeem a{font-weight:800;color:var(--orange);white-space:nowrap;font-size:13px}
+
+.prize-editor{margin-top:10px;border-top:1px solid #F0EDE8;padding-top:14px}
+.prize-editor-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.prize-editor-head h3{font-family:'Fredoka One',cursive;font-size:20px}
+.prize-row{display:grid;grid-template-columns:minmax(0,1.4fr) 110px 130px 90px auto;gap:10px;align-items:center;margin-bottom:8px}
+.prize-row input{border:2px solid #E8E4DF;border-radius:12px;padding:9px 12px;font-family:inherit;font-weight:700;width:100%}
+.prize-row.skill{grid-template-columns:minmax(0,1.4fr) 110px 140px auto}
+.skill-game{display:flex;flex-direction:column;align-items:center}
+.skill-hud{width:min(100%,440px);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-weight:800}
+.skill-hud b{font-family:'Fredoka One',cursive;font-size:28px;color:var(--orange)}
+.skill-canvas-wrap{position:relative;width:min(100%,440px)}
+.skill-canvas-wrap canvas{width:100%;height:auto;display:block;border-radius:20px;background:#123024;touch-action:none}
+.skill-overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,20,16,.35);border-radius:20px}
+.skill-pad{display:grid;grid-template-columns:repeat(3,minmax(64px,76px));gap:8px;justify-content:center;margin-top:12px;touch-action:manipulation}
+.skill-pad button,.car-pad button{height:64px;border-radius:16px;border:2px solid #E8E4DF;background:white;font-size:22px;font-weight:900;font-family:inherit;cursor:pointer}
+.car-pad{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:min(100%,440px);margin-top:12px}
+.score-targets{list-style:none;width:min(100%,440px);display:flex;gap:8px;overflow:auto;margin-top:12px;padding-bottom:4px}
+.score-targets li{flex:none;background:#FFF8EE;border-radius:14px;padding:8px 12px;min-width:96px}
+.score-targets li span{display:block;font-size:12px;font-weight:800;color:#998}
+.score-targets li b{font-size:14px}
+.score-targets li.hit{background:#EDFFD9}
+@media(max-width:700px){
+  .game-picker{display:flex;overflow:auto;padding-bottom:4px}
+  .game-picker button{min-width:220px;flex:none}
+  .games-hero-row{align-items:flex-start}
+  .skill-pad{grid-template-columns:repeat(3,minmax(56px,22vw))}
+  .skill-pad button,.car-pad button{height:58px}
+}
+
+@media(max-width:1100px){
+  .wa-banner,.play-banner{margin:0 24px 40px}
+}
+@media(max-width:900px){
+  .games-layout{grid-template-columns:1fr}
+  .game-picker{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .wa-banner{grid-template-columns:auto minmax(0,1fr)}
+  .wa-banner>.btn-whatsapp{grid-column:1/-1;justify-content:center}
+  .play-banner{grid-template-columns:1fr;padding:28px}
+  .play-banner-art{font-size:46px}
+}
+@media(max-width:600px){
+  .wa-float{right:16px;bottom:80px;padding:12px}
+  .wa-float-text{display:none}
+  .wa-banner,.play-banner{margin:0 14px 32px;padding:22px 18px;border-radius:22px}
+  .wa-banner{grid-template-columns:1fr}
+  .wa-banner-icon{width:56px;height:56px;border-radius:18px}
+  .wa-banner .sec-head{font-size:24px}
+  .coin-wallet{width:100%}
+  .account-wallet .btn{margin-left:0;width:100%;justify-content:center}
+  .boxes{gap:10px}
+  .mystery-box{padding:18px 6px;border-radius:16px}
+  .prize-row{grid-template-columns:1fr 1fr;padding:10px;border:1px solid #F0EDE8;border-radius:12px}
+  .prize-row input:first-child{grid-column:1/-1}
+  .prize-row-head{display:none}
+  .coin-redeem{flex-direction:column;align-items:flex-start}
 }

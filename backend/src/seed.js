@@ -238,6 +238,7 @@ function buildSeed() {
       cod_note: "Pay when the parcel arrives. Available across Pakistan.",
     }),
     section(22, "recent", "Recently viewed header", 22, { label: "Recently Viewed", title: "Still Thinking?" }),
+    ...buildEngagementSections(23),
   ];
 
   const pages = [
@@ -301,6 +302,10 @@ function buildSeed() {
     coupons,
     customers: [],
     newsletter: [],
+    notifications: [],
+    games: buildGames(),
+    game_plays: [],
+    coin_transactions: [],
     inquiries: [],
     ...buildPlaces(),
   };
@@ -313,6 +318,92 @@ function cat(id, slug, name, emoji, blurb, color, count_label, parent_slug, grou
 function product(id, name, emoji, category_slug, gender, age_min, age_max, age_label, price, compare_price, badge, rating, review_count, stock, sold, description, gradient, brand, sku, tags, featured, is_deal) {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   return { id, slug, name, emoji, image_url: "", image_alt: "", category_slug, gender, age_min, age_max, age_label, price, compare_price, badge, rating, review_count, stock, sold, description, gradient: `linear-gradient(135deg,${gradient})`, brand, sku, tags, featured, is_deal, active: 1, created_at: NOW, updated_at: NOW };
+}
+
+function buildEngagementSections(startId) {
+  return [
+    section(startId, "whatsapp", "WhatsApp chat", startId, {
+      number: "923001234567",
+      button_label: "Chat on WhatsApp",
+      greeting: "Assalam o Alaikum Kidlo! I need help choosing a toy.",
+      product_message: "Hi Kidlo, I want to order {product} ({price}). Link: {url}",
+      hours: "Mon–Sat, 9am–9pm PKT",
+      show_floating: 1,
+      show_on_product: 1,
+      banner_label: "Order on WhatsApp",
+      banner_title: "Prefer to order on chat?",
+      banner_text: "Send us a photo or a toy name. Our team replies with prices, stock, and delivery time for your city.",
+    }),
+    section(startId + 1, "coins", "Kidlo Coins rules", startId + 1, {
+      enabled: 1,
+      coin_value_pkr: 1,
+      max_redeem_percent: 20,
+      min_redeem_coins: 50,
+      signup_bonus: 25,
+      daily_play_limit: 0,
+    }),
+    section(startId + 2, "play_banner", "Play & Win banner", startId + 2, {
+      label: "Play & Win",
+      title: "Play games, win Kidlo Coins",
+      text: "Log in to spin the wheel, open a gift box, or play Snake and Toy Cars. Coins you win come off your next toy order.",
+      button: "Play now",
+    }),
+  ];
+}
+
+function buildGames() {
+  return [
+    {
+      id: 1, slug: "spin-wheel", name: "Spin the Wheel", type: "spin", emoji: "🎡",
+      description: "One spin a day. The prize is chosen on our server.",
+      cost_coins: 0, daily_limit: 1, enabled: 1, sort_order: 1, created_at: NOW, updated_at: NOW,
+      prizes: [
+        { label: "5 coins", coins: 5, weight: 30 },
+        { label: "10 coins", coins: 10, weight: 25 },
+        { label: "Try again", coins: 0, weight: 20 },
+        { label: "25 coins", coins: 25, weight: 12 },
+        { label: "50 coins", coins: 50, weight: 8 },
+        { label: "100 coins", coins: 100, weight: 4 },
+        { label: "Try again", coins: 0, weight: 15 },
+        { label: "250 coins", coins: 250, weight: 1 },
+      ],
+    },
+    {
+      id: 2, slug: "mystery-box", name: "Mystery Box", type: "box", emoji: "🎁",
+      description: "Open one gift box a day. One of them might hold a big coin prize.",
+      cost_coins: 0, daily_limit: 1, enabled: 1, sort_order: 2, created_at: NOW, updated_at: NOW,
+      prizes: [
+        { label: "Empty box", coins: 0, weight: 35 },
+        { label: "15 coins", coins: 15, weight: 35 },
+        { label: "40 coins", coins: 40, weight: 20 },
+        { label: "120 coins", coins: 120, weight: 10 },
+      ],
+    },
+    {
+      id: 3, slug: "snake", name: "Snake", type: "snake", emoji: "🐍",
+      description: "Eat the apples and grow. Coins follow your score, and you can play once a day.",
+      cost_coins: 0, daily_limit: 1, enabled: 1, sort_order: 3, created_at: NOW, updated_at: NOW,
+      prizes: [
+        { label: "Nice try", coins: 5, min_score: 0 },
+        { label: "5 apples", coins: 15, min_score: 5 },
+        { label: "10 apples", coins: 40, min_score: 10 },
+        { label: "20 apples", coins: 100, min_score: 20 },
+        { label: "35 apples", coins: 200, min_score: 35 },
+      ],
+    },
+    {
+      id: 4, slug: "toy-cars", name: "Toy Cars", type: "cars", emoji: "🚗",
+      description: "Steer your toy car past traffic. Drive further to win more coins. Once a day.",
+      cost_coins: 0, daily_limit: 1, enabled: 1, sort_order: 4, created_at: NOW, updated_at: NOW,
+      prizes: [
+        { label: "Short drive", coins: 5, min_score: 0 },
+        { label: "200 m", coins: 20, min_score: 200 },
+        { label: "500 m", coins: 50, min_score: 500 },
+        { label: "1 km", coins: 120, min_score: 1000 },
+        { label: "2 km", coins: 250, min_score: 2000 },
+      ],
+    },
+  ];
 }
 
 function section(id, section_key, name, sort_order, payload) {
@@ -333,6 +424,7 @@ function buildSeoEntries({ pages, products, categories, blog_posts }) {
     seo("/checkout", "Secure Checkout | Kidlo Toys", "Complete your Kidlo order with secure delivery and payment details.", "", "website", "noindex,nofollow"),
     seo("/wishlist", "My Wishlist | Kidlo Toys", "View your saved Kidlo toys and gift ideas.", "", "website", "noindex,nofollow"),
     seo("/account", "My Account | Kidlo Toys", "Manage your Kidlo account and view your orders.", "", "website", "noindex,nofollow"),
+    seo("/games", "Play & Win Kidlo Coins | Kidlo Toys", "Log in, play quick games, win Kidlo Coins, and use them as a discount on toys.", "kidlo coins,play and win,toy rewards pakistan", "website"),
   ];
   for (const item of pages) rows.push(seo(`/p/${item.slug}`, `${item.title} | Kidlo Toys`, item.excerpt, `${item.title.toLowerCase()},kidlo toys`, "article"));
   for (const item of categories.filter((row) => row.active)) rows.push(seo(`/shop/${item.slug}`, `${item.name} | Shop Toys Online at Kidlo`, item.blurb || `Shop ${item.name.toLowerCase()} with nationwide delivery across Pakistan.`, `${item.name.toLowerCase()},toys pakistan`, "website"));
