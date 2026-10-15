@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { api } from "../lib/format";
+import { PhoneInput } from "./PlaceFields";
 
 export default function InquiryForm({ type = "contact" }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [note, setNote] = useState("");
+  const [phoneOk, setPhoneOk] = useState(true);
   const labels = {
     careers: ["Application details", "Tell us the role, your experience, city, and a link to your CV."],
     wholesale: ["Business requirements", "Include your business type, city, products, quantities, and target date."],
@@ -17,6 +19,10 @@ export default function InquiryForm({ type = "contact" }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (!phoneOk) {
+      setNote("Enter the full phone number for the selected country, or leave it empty.");
+      return;
+    }
     try {
       await api("/api/inquiries", { method: "POST", body: { ...form, type } });
       setNote("Received. We reply within one working day.");
@@ -30,7 +36,7 @@ export default function InquiryForm({ type = "contact" }) {
     <form className="form-card inquiry-form" onSubmit={submit}>
       <div className="form-grid">
         <div className="field"><label htmlFor={`${type}-name`}>Full name</label><input id={`${type}-name`} required autoComplete="name" placeholder="Your full name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></div>
-        <div className="field"><label htmlFor={`${type}-phone`}>Phone number</label><input id={`${type}-phone`} inputMode="tel" autoComplete="tel" placeholder="03xx xxx xxxx" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></div>
+        <PhoneInput id={`${type}-phone`} label="Phone number" value={form.phone} onChange={(phone, info) => { setForm((current) => ({ ...current, phone })); setPhoneOk(info.valid); }} />
       </div>
       <div className="field"><label htmlFor={`${type}-email`}>Email address</label><input id={`${type}-email`} type="email" autoComplete="email" placeholder="you@example.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></div>
       <div className="field"><label htmlFor={`${type}-message`}>{messageLabel}</label><textarea id={`${type}-message`} required rows={6} placeholder={messageHint} value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} /></div>

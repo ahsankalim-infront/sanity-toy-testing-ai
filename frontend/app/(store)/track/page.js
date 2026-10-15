@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { api, pkr } from "../../../lib/format";
 import ProductMedia from "../../../components/ProductMedia";
+import { PhoneInput } from "../../../components/PlaceFields";
 
 const STEPS = ["Placed", "Processing", "Shipped", "Delivered"];
 
@@ -35,7 +36,7 @@ export default function TrackPage() {
         <form className="form-card track-form" onSubmit={submit}>
           <div className="track-form-head"><span>📍</span><div><h2>Find your parcel</h2><p>Enter the details used when placing the order.</p></div></div>
           <div className="field"><label htmlFor="track-order">Order number</label><input id="track-order" required autoCapitalize="characters" placeholder="e.g. KD1001" value={form.order_no} onChange={(event) => setForm({ ...form, order_no: event.target.value.toUpperCase() })} /></div>
-          <div className="field"><label htmlFor="track-phone">Phone number</label><input id="track-phone" required inputMode="tel" autoComplete="tel" placeholder="03xx xxx xxxx" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></div>
+          <PhoneInput id="track-phone" label="Phone used at checkout" required value={form.phone} onChange={(phone) => setForm((current) => ({ ...current, phone }))} />
           <button className="btn btn-orange track-button" type="submit">Track my order <span>→</span></button>
           {error ? <p className="track-error">{error}</p> : null}
           <div className="track-demo"><span>Demo details</span><button type="button" onClick={() => setForm({ order_no: "KD1001", phone: "03001234567" })}>KD1001 · 03001234567</button></div>

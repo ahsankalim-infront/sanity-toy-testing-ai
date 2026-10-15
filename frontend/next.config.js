@@ -2,6 +2,10 @@
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
+  experimental: {
+    // Admin switches (hide product, disable page, pause games) must show on the next click.
+    staleTimes: { dynamic: 0, static: 30 },
+  },
   async rewrites() {
     // On Vercel, vercel.json sends /api to the backend service. This rewrite is only
     // for local `next dev`, where that route table is not running. The binding URL

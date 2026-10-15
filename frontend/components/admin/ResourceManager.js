@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { adminHeaders, useAdminRows } from "./AdminShell";
 import MediaUploader from "./MediaUploader";
+import { PhoneInput } from "../PlaceFields";
 import { api, pkr } from "../../lib/format";
 
 const PAGE_SIZE = 12;
@@ -93,7 +94,7 @@ export default function ResourceManager({ table, title, description, columns, bl
             {Object.keys(blank).concat(Object.keys(draft).filter((key) => !(key in blank) && !["id", "created_at", "updated_at"].includes(key))).map((key) => (
               key === "image_alt" && "image_url" in blank ? null : (
                 <div className={`field ${key === "image_url" || wideField(key, draft[key]) ? "wide" : ""}`} key={key}>
-                  {key === "image_url" ? <ImagePicker draft={draft} onChange={setDraft} /> : <><label>{labelFor(key)}</label><ValueField field={key} value={draft[key]} onChange={(value) => setDraft({ ...draft, [key]: value })} /></>}
+                  {key === "image_url" ? <ImagePicker draft={draft} onChange={setDraft} /> : key === "phone" ? <PhoneInput id={`${table}-phone`} label={labelFor(key)} value={draft.phone} onChange={(phone) => setDraft((current) => ({ ...current, phone }))} defaultCountry={draft.country_code || "PK"} /> : <><label>{labelFor(key)}</label><ValueField field={key} value={draft[key]} onChange={(value) => setDraft({ ...draft, [key]: value })} /></>}
                 </div>
               )
             ))}

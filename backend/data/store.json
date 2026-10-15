@@ -14,7 +14,12 @@
       "games",
       "customers",
       "coin_transactions",
-      "game_plays"
+      "game_plays",
+      "blog_posts",
+      "categories",
+      "pages",
+      "coupons",
+      "reviews"
     ],
     "demo_orders": 90,
     "games_seeded": 1,
@@ -546,7 +551,7 @@
       "is_deal": 0,
       "active": 1,
       "created_at": "2025-08-01T10:00:00.000Z",
-      "updated_at": "2026-10-09T14:54:53.953Z"
+      "updated_at": "2026-10-15T05:59:28.603Z"
     },
     {
       "id": 2,
@@ -1372,7 +1377,7 @@
         "code": "KIDLO50",
         "extra": "Free delivery over PKR 2,000"
       },
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.500Z"
     },
     {
       "id": 2,
@@ -1477,7 +1482,7 @@
           "SECURE CHECKOUT"
         ]
       },
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.413Z"
     },
     {
       "id": 4,
@@ -1916,7 +1921,7 @@
           "Birthday surprises"
         ]
       },
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.478Z"
     },
     {
       "id": 19,
@@ -2030,7 +2035,7 @@
         "banner_title": "Prefer to order on chat?",
         "banner_text": "Send us a photo or a toy name. Our team replies with prices, stock, and delivery time for your city."
       },
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:59:53.014Z"
     },
     {
       "id": 24,
@@ -2046,7 +2051,7 @@
         "signup_bonus": 25,
         "daily_play_limit": 0
       },
-      "updated_at": "2026-10-13T09:47:23.219Z"
+      "updated_at": "2026-10-15T05:58:59.059Z"
     },
     {
       "id": 25,
@@ -2060,7 +2065,7 @@
         "text": "Log in to spin the wheel, open a gift box, or play Snake and Toy Cars. Coins you win come off your next toy order.",
         "button": "Play now"
       },
-      "updated_at": "2026-10-13T09:47:23.231Z"
+      "updated_at": "2026-10-15T05:58:58.455Z"
     }
   ],
   "pages": [
@@ -2074,7 +2079,7 @@
       "emoji": "🏪",
       "enabled": 1,
       "sort_order": 1,
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.334Z"
     },
     {
       "id": 2,
@@ -2288,7 +2293,7 @@
       "og_type": "website",
       "schema_json": {},
       "enabled": 1,
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.760Z"
     },
     {
       "id": 5,
@@ -7377,7 +7382,7 @@
       "email": "ahsan@gmail.com",
       "phone": "387y329",
       "password_hash": "kidlo-static-salt:387afe88c19433de7c6a4172d06c77d367ecffb1d3916117c354bfc3a41030e0",
-      "coins": 35,
+      "coins": 60,
       "games_blocked": 0,
       "created_at": "2026-10-13T09:36:38.572Z"
     }
@@ -7473,7 +7478,7 @@
       "enabled": 1,
       "sort_order": 2,
       "created_at": "2025-08-01T10:00:00.000Z",
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:59.037Z"
     },
     {
       "id": 3,
@@ -7514,7 +7519,7 @@
       "enabled": 1,
       "sort_order": 3,
       "created_at": "2025-08-01T10:00:00.000Z",
-      "updated_at": "2025-08-01T10:00:00.000Z"
+      "updated_at": "2026-10-15T05:58:58.734Z"
     },
     {
       "id": 4,
@@ -7582,6 +7587,30 @@
       "coins_won": 0,
       "score": 0,
       "created_at": "2026-10-13T09:38:19.600Z"
+    },
+    {
+      "id": 3,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "game_id": 3,
+      "game_name": "Snake",
+      "result": "win",
+      "prize_label": "Nice try · 1 apples",
+      "coins_won": 5,
+      "score": 1,
+      "created_at": "2026-10-13T09:50:20.381Z"
+    },
+    {
+      "id": 4,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "game_id": 4,
+      "game_name": "Toy Cars",
+      "result": "win",
+      "prize_label": "200 m · 360 m",
+      "coins_won": 20,
+      "score": 360,
+      "created_at": "2026-10-13T09:50:41.912Z"
     }
   ],
   "coin_transactions": [
@@ -7606,6 +7635,28 @@
       "reference": "play-1",
       "note": "Won 10 coins on Spin the Wheel",
       "created_at": "2026-10-13T09:38:08.895Z"
+    },
+    {
+      "id": 3,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "type": "game_win",
+      "coins": 5,
+      "balance_after": 40,
+      "reference": "play-3",
+      "note": "Nice try on Snake (1 apples)",
+      "created_at": "2026-10-13T09:50:24.494Z"
+    },
+    {
+      "id": 4,
+      "customer_id": 1,
+      "customer_name": "Ahsan",
+      "type": "game_win",
+      "coins": 20,
+      "balance_after": 60,
+      "reference": "play-4",
+      "note": "200 m on Toy Cars (360 m)",
+      "created_at": "2026-10-13T09:50:57.105Z"
     }
   ],
   "newsletter": [],

@@ -1,8 +1,98 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "../lib/format";
 
-export function PhoneField({ countries, countryCode, phone, onCountry, onPhone }) {
+let placesRequest = null;
+
+export function loadPlaces() {
+  if (!placesRequest) {
+    placesRequest = api("/api/places").catch((err) => {
+      placesRequest = null;
+      throw err;
+    });
+  }
+  return placesRequest;
+}
+
+export function usePlaces() {
+  const [places, setPlaces] = useState({ countries: [], cities: [] });
+  useEffect(() => {
+    let live = true;
+    loadPlaces().then((data) => { if (live) setPlaces(data); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+  return places;
+}
+
+export function splitPhone(value, countries, fallbackCode = "PK") {
+  const raw = String(value || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  const fallback = countries.find((row) => row.code === fallbackCode) || countries[0];
+  if (!digits) return { countryCode: fallback?.code || fallbackCode, national: "" };
+  if (raw.startsWith("+") || raw.startsWith("00")) {
+    const plain = digits.replace(/^00/, "");
+    const match = [...countries]
+      .sort((a, b) => b.dial.length - a.dial.length)
+      .find((row) => plain.startsWith(row.dial.replace(/\D/g, "")));
+    if (match) return { countryCode: match.code, national: plain.slice(match.dial.replace(/\D/g, "").length).replace(/^0+/, "") };
+  }
+  const dial = String(fallback?.dial || "").replace(/\D/g, "");
+  let national = digits;
+  if (dial && national.startsWith(dial) && national.length > Number(fallback?.digits || 0)) national = national.slice(dial.length);
+  return { countryCode: fallback?.code || fallbackCode, national: national.replace(/^0+/, "") };
+}
+
+export function joinPhone(country, national) {
+  if (!national) return "";
+  if (!country || country.code === "PK") return `0${national}`;
+  return `${country.dial}${national}`;
+}
+
+export function PhoneInput({ value, onChange, id = "phone", label = "Mobile number", required = false, defaultCountry = "PK" }) {
+  const { countries } = usePlaces();
+  const [countryCode, setCountryCode] = useState(defaultCountry);
+  const [national, setNational] = useState("");
+  const lastSent = useRef(null);
+
+  useEffect(() => {
+    if (!countries.length || value === lastSent.current) return;
+    const parsed = splitPhone(value, countries, countryCode || defaultCountry);
+    setCountryCode(parsed.countryCode);
+    setNational(parsed.national);
+  }, [value, countries]);
+
+  function emit(code, digits) {
+    const country = countries.find((row) => row.code === code);
+    const next = joinPhone(country, digits);
+    lastSent.current = next;
+    onChange(next, { country, national: digits, valid: !digits || digits.length === Number(country?.digits) });
+  }
+
+  if (!countries.length) {
+    return (
+      <div className="field">
+        <label htmlFor={id}>{label}</label>
+        <input id={id} required={required} inputMode="tel" autoComplete="tel" value={value || ""} onChange={(event) => onChange(event.target.value, { valid: true })} placeholder="03xx xxx xxxx" />
+      </div>
+    );
+  }
+
+  return (
+    <PhoneField
+      id={id}
+      label={label}
+      required={required}
+      countries={countries}
+      countryCode={countryCode}
+      phone={national}
+      onCountry={(code) => { setCountryCode(code); setNational(""); emit(code, ""); }}
+      onPhone={(digits) => { setNational(digits); emit(countryCode, digits); }}
+    />
+  );
+}
+
+export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, id = "phone", label = "Mobile number", required = true }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const root = useRef(null);
@@ -30,7 +120,7 @@ export function PhoneField({ countries, countryCode, phone, onCountry, onPhone }
 
   return (
     <div className="field" ref={root}>
-      <label htmlFor="phone">Mobile number</label>
+      <label htmlFor={id}>{label}</label>
       <div className={`phone-modern ${open ? "open" : ""}`}>
         <button type="button" className="dial-btn" aria-expanded={open} onClick={() => { setOpen((value) => !value); setQuery(""); }}>
           <span className="dial-flag">{country?.flag}</span>
@@ -38,8 +128,8 @@ export function PhoneField({ countries, countryCode, phone, onCountry, onPhone }
           <span className="dial-caret">▾</span>
         </button>
         <input
-          id="phone"
-          required
+          id={id}
+          required={required}
           inputMode="numeric"
           autoComplete="tel-national"
           value={groupPhone(phone, country)}

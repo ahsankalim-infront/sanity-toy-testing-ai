@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, pkr } from "../../../lib/format";
+import { PhoneInput } from "../../../components/PlaceFields";
 
 export default function AccountPage() {
   const [mode, setMode] = useState("login");
@@ -11,6 +12,7 @@ export default function AccountPage() {
   const [orders, setOrders] = useState([]);
   const [wallet, setWallet] = useState(null);
   const [error, setError] = useState("");
+  const [phoneOk, setPhoneOk] = useState(true);
 
   async function load(token) {
     const headers = { Authorization: `Bearer ${token}` };
@@ -35,6 +37,10 @@ export default function AccountPage() {
   async function submit(event) {
     event.preventDefault();
     setError("");
+    if (mode === "register" && !phoneOk) {
+      setError("Enter the full mobile number for the selected country, or leave it empty.");
+      return;
+    }
     try {
       const path = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const data = await api(path, { method: "POST", body: form });
@@ -67,7 +73,7 @@ export default function AccountPage() {
           <h1 className="sec-head" style={{ fontSize: 36 }}>{mode === "login" ? "Welcome back" : "Create account"}</h1>
           {mode === "register" ? <div className="field"><label>Name</label><input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></div> : null}
           <div className="field"><label>Email</label><input type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></div>
-          {mode === "register" ? <div className="field"><label>Phone</label><input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></div> : null}
+          {mode === "register" ? <PhoneInput id="register-phone" label="Mobile number" value={form.phone} onChange={(phone, info) => { setForm((current) => ({ ...current, phone })); setPhoneOk(info.valid); }} /> : null}
           <div className="field"><label>Password</label><input type="password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} /></div>
           {error ? <p className="muted">{error}</p> : null}
           <button className="btn btn-orange" type="submit">{mode === "login" ? "Login" : "Register"}</button>

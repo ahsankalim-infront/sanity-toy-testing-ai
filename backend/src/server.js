@@ -277,6 +277,34 @@ async function finishSkillPlay(customer, game, prizes, body) {
   return { prize: { label: picked.prize.label, coins: won }, score, balance, played_today: playsToday(customer.id, game.id) };
 }
 
+const SLUG_TABLES = { blog_posts: "title", pages: "title", products: "name", categories: "name", games: "name" };
+
+function slugify(value) {
+  return String(value || "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80);
+}
+
+function uniqueSlug(table, wanted, ownId) {
+  const base = slugify(wanted) || `${table.replace(/s$/, "")}-${Date.now().toString(36)}`;
+  const taken = new Set(store.all(table).filter((row) => Number(row.id) !== Number(ownId)).map((row) => row.slug));
+  let slug = base;
+  for (let n = 2; taken.has(slug); n += 1) slug = `${base}-${n}`;
+  return slug;
+}
+
+function nationalDigits(value, dialCode = "") {
+  let num = String(value || "").replace(/\D/g, "").replace(/^00/, "");
+  const dial = String(dialCode || "").replace(/\D/g, "");
+  if (dial && num.startsWith(dial) && num.length > dial.length + 6) num = num.slice(dial.length);
+  if (num.startsWith("92") && num.length === 12) num = num.slice(2);
+  return num.replace(/^0+/, "");
+}
+
+function optionalPhoneError(phone) {
+  const count = String(phone || "").replace(/\D/g, "").length;
+  if (!count) return "";
+  return count < 7 || count > 15 ? "Enter a complete phone number" : "";
+}
+
 function digits(value) {
   return String(value || "").replace(/\D/g, "").replace(/^92/, "0");
 }
@@ -599,6 +627,7 @@ async function main() {
   app.post("/api/inquiries", async (req, res) => {
     const { type, name, email, phone, message } = req.body || {};
     if (!name || !message) return res.status(400).json({ error: "Name and message are required" });
+    if (optionalPhoneError(phone)) return res.status(400).json({ error: optionalPhoneError(phone) });
     const row = await store.insert("inquiries", {
       type: type || "contact",
       name,
@@ -758,8 +787,8 @@ async function main() {
 
   app.post("/api/orders/track", (req, res) => {
     const orderNo = String(req.body.order_no || "").trim().toUpperCase();
-    const phone = digits(req.body.phone);
-    const order = store.all("orders").find((row) => row.order_no.toUpperCase() === orderNo && digits(row.phone) === phone);
+    const order = store.all("orders").find((row) => row.order_no.toUpperCase() === orderNo
+      && nationalDigits(row.phone, row.dial_code) === nationalDigits(req.body.phone, row.dial_code));
     if (!order) return res.status(404).json({ error: "No order matches that number and phone" });
     const items = store.all("order_items").filter((row) => Number(row.order_id) === Number(order.id));
     res.json({ order, items });
@@ -768,6 +797,7 @@ async function main() {
   app.post("/api/auth/register", async (req, res) => {
     const { name, email, phone, password } = req.body || {};
     if (!name || !email || !password) return res.status(400).json({ error: "Name, email, and password are required" });
+    if (optionalPhoneError(phone)) return res.status(400).json({ error: optionalPhoneError(phone) });
     const exists = store.all("customers").find((row) => row.email.toLowerCase() === String(email).toLowerCase());
     if (exists) return res.status(400).json({ error: "An account with that email already exists" });
     const customer = await store.insert("customers", {
@@ -1000,6 +1030,10 @@ async function main() {
     if (table === "games" && !GAME_TYPES.includes(input.type)) {
       return res.status(400).json({ error: `Game type must be one of: ${GAME_TYPES.join(", ")}` });
     }
+    if (SLUG_TABLES[table]) {
+      if (!input.slug && !input[SLUG_TABLES[table]]) return res.status(400).json({ error: `Add a ${SLUG_TABLES[table]} first` });
+      input.slug = uniqueSlug(table, input.slug || input[SLUG_TABLES[table]]);
+    }
     if (input.password) {
       input.password_hash = hashPassword(input.password);
       delete input.password;
@@ -1032,6 +1066,9 @@ async function main() {
     }
     const before = store.get(table, req.params.id);
     if (!before) return res.status(404).json({ error: "Not found" });
+    if (SLUG_TABLES[table] && "slug" in input) {
+      input.slug = uniqueSlug(table, input.slug || input[SLUG_TABLES[table]] || before[SLUG_TABLES[table]], before.id);
+    }
     let coinDelta = 0;
     if (table === "customers" && input.coins !== undefined) {
       coinDelta = Math.trunc(Number(input.coins) || 0) - (Number(before.coins) || 0);
