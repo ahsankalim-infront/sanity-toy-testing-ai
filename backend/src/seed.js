@@ -306,6 +306,7 @@ function buildSeed() {
     games: buildGames(),
     game_plays: [],
     coin_transactions: [],
+    payment_accounts: buildPaymentAccounts(),
     inquiries: [],
     ...buildPlaces(),
   };
@@ -403,6 +404,14 @@ function buildGames() {
         { label: "2 km", coins: 250, min_score: 2000 },
       ],
     },
+  ];
+}
+
+function buildPaymentAccounts() {
+  return [
+    { id: 1, method: "easypaisa", title: "Kidlo EasyPaisa", account_name: "Kidlo Toys", account_number: "03001234567", bank_name: "EasyPaisa", iban: "", instructions: "Send the exact order total to this EasyPaisa wallet, then upload the payment screenshot and the transaction ID.", enabled: 1, sort_order: 1, updated_at: NOW },
+    { id: 2, method: "jazzcash", title: "Kidlo JazzCash", account_name: "Kidlo Toys", account_number: "03001234567", bank_name: "JazzCash", iban: "", instructions: "Send the exact order total to this JazzCash wallet, then upload the payment screenshot and the transaction ID.", enabled: 1, sort_order: 2, updated_at: NOW },
+    { id: 3, method: "bank", title: "Meezan Bank transfer", account_name: "Kidlo Toys (Pvt) Ltd", account_number: "01234567890123", bank_name: "Meezan Bank", iban: "PK36MEZN0001234567890123", instructions: "Transfer the exact order total. Use your order name as the reference, then upload the bank receipt.", enabled: 1, sort_order: 3, updated_at: NOW },
   ];
 }
 

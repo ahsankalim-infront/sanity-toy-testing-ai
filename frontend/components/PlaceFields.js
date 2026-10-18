@@ -92,7 +92,7 @@ export function PhoneInput({ value, onChange, id = "phone", label = "Mobile numb
   );
 }
 
-export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, id = "phone", label = "Mobile number", required = true }) {
+export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, id = "phone", label = "Mobile number", required = true, error = "" }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const root = useRef(null);
@@ -119,9 +119,9 @@ export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, 
   }
 
   return (
-    <div className="field" ref={root}>
+    <div className={`field ${error ? "invalid" : ""}`} ref={root}>
       <label htmlFor={id}>{label}</label>
-      <div className={`phone-modern ${open ? "open" : ""}`}>
+      <div className={`phone-modern ${open ? "open" : ""} ${error ? "invalid" : ""}`}>
         <button type="button" className="dial-btn" aria-expanded={open} onClick={() => { setOpen((value) => !value); setQuery(""); }}>
           <span className="dial-flag">{country?.flag}</span>
           <span>{country?.dial}</span>
@@ -134,6 +134,7 @@ export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, 
           autoComplete="tel-national"
           value={groupPhone(phone, country)}
           placeholder={country?.example || "Mobile number"}
+          aria-invalid={error ? "true" : "false"}
           onChange={(event) => type(event.target.value)}
         />
         {open ? (
@@ -154,11 +155,12 @@ export function PhoneField({ countries, countryCode, phone, onCountry, onPhone, 
         ) : null}
       </div>
       <small className="field-hint">{country ? `${country.name} · ${country.digits} digits` : "Choose a country"}</small>
+      {error ? <small className="field-error">{error}</small> : null}
     </div>
   );
 }
 
-export function CityField({ cities, countryCode, city, onCity }) {
+export function CityField({ cities, countryCode, city, onCity, error = "" }) {
   const [open, setOpen] = useState(false);
   const root = useRef(null);
   const list = cities.filter((row) => row.country_code === countryCode);
@@ -175,12 +177,13 @@ export function CityField({ cities, countryCode, city, onCity }) {
   }, []);
 
   return (
-    <div className="field" ref={root}>
+    <div className={`field ${error ? "invalid" : ""}`} ref={root}>
       <label htmlFor="city">City</label>
-      <div className={`city-modern ${open ? "open" : ""}`}>
+      <div className={`city-modern ${open ? "open" : ""} ${error ? "invalid" : ""}`}>
         <input
           id="city"
           required
+          aria-invalid={error ? "true" : "false"}
           autoComplete="address-level2"
           value={city}
           placeholder={list.length ? "Search your city" : "Enter your city"}
@@ -206,6 +209,7 @@ export function CityField({ cities, countryCode, city, onCity }) {
           </div>
         ) : null}
       </div>
+      {error ? <small className="field-error">{error}</small> : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "./ProductCard";
 import ProductMedia from "./ProductMedia";
@@ -15,6 +16,7 @@ export default function HomePage({ data }) {
   const [filter, setFilter] = useState("All");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const router = useRouter();
   const { add } = useCart();
   const featured = products.filter((row) => row.featured);
   const shown = featured.filter((row) => {
@@ -119,7 +121,10 @@ export default function HomePage({ data }) {
                 <div style={{ height: 6, background: "rgba(255,255,255,.15)", borderRadius: 3 }}><div style={{ width: "62%", height: "100%", background: "linear-gradient(90deg,var(--yellow),var(--orange))", borderRadius: 3 }} /></div>
                 <p style={{ color: "rgba(255,255,255,.5)", fontSize: 12, fontWeight: 700, marginTop: 8 }}>⚡ {heroDeal.sold} sold · Only {heroDeal.stock} left!</p>
               </div>
-              <button className="btn btn-yellow" type="button" style={{ width: "100%", justifyContent: "center" }} disabled={Number(heroDeal.stock) <= 0} onClick={() => add(heroDeal)}>{Number(heroDeal.stock) <= 0 ? "Sold Out" : `🛒 Add to Cart — ${pkr(heroDeal.price)}`}</button>
+              <div className="pcard-actions">
+                <button className="btn btn-yellow" type="button" style={{ width: "100%", justifyContent: "center" }} disabled={Number(heroDeal.stock) <= 0} onClick={() => add(heroDeal)}>{Number(heroDeal.stock) <= 0 ? "Sold Out" : `🛒 Add to Cart — ${pkr(heroDeal.price)}`}</button>
+                {Number(heroDeal.stock) <= 0 ? null : <button className="btn btn-dark" type="button" onClick={() => { if (add(heroDeal)) router.push("/checkout"); }}>Buy</button>}
+              </div>
             </div>
           </div>
         </section>

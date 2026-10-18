@@ -14,6 +14,7 @@ const LABELS = {
   schema_json: "Structured data", image_alt: "Alt text", created_at: "Created", updated_at: "Updated", count_label: "Count label",
   filter_tag: "Filter tag", virtual_value: "Virtual value", coupon_code: "Coupon", country_code: "Country code", country_name: "Country",
   dial_code: "Dial code", coins_used: "Coins used", coins_discount: "Coins discount", coins_refunded: "Coins refunded", customer_id: "Customer ID",
+  payment_status: "Payment status", payment_account_id: "Payment account", payment_account_label: "Paid to", payment_txn: "Transaction ID", payment_proof_url: "Payment receipt", payment_note: "Payment note", account_number: "Account number", bank_name: "Bank",
 };
 const MONEY = new Set(["price", "compare_price", "total", "subtotal", "shipping", "discount", "min_order", "value", "coins_discount"]);
 

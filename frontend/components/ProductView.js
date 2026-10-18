@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import { api, discount, pkr, stars } from "../lib/format";
@@ -16,6 +17,7 @@ function remember(id) {
 }
 
 export default function ProductView({ slug, initial = null }) {
+  const router = useRouter();
   const { add, toggleWish, wished } = useCart();
   const [data, setData] = useState(initial);
   const [error, setError] = useState("");
@@ -81,6 +83,7 @@ export default function ProductView({ slug, initial = null }) {
                 <button type="button" onClick={() => setQty((value) => Math.min(Number(product.stock) || 1, value + 1))} disabled={qty >= Number(product.stock)}>+</button>
               </div>
               <button className="btn btn-orange" disabled={product.stock <= 0} onClick={() => add(product, qty)}>🛒 Add to Cart</button>
+              {product.stock <= 0 ? null : <button className="btn btn-dark" type="button" onClick={() => { if (add(product, qty)) router.push("/checkout"); }}>Buy</button>}
               <button className="btn btn-outline" onClick={() => toggleWish(product)}>{wished(product.id) ? "❤️ Saved" : "🤍 Wishlist"}</button>
               <WhatsAppProductButton product={product} />
             </div>

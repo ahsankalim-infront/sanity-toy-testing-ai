@@ -150,8 +150,13 @@ section{padding:72px 60px}
 .pcard-price{font-family:'Fredoka One',cursive;font-size:22px;color:var(--orange)}
 .pcard-old{font-size:13px;color:#bbb;text-decoration:line-through;font-weight:600;margin-right:4px}
 .pcard-dis{font-size:11px;font-weight:800;color:var(--green);background:#EDFFD9;padding:2px 7px;border-radius:10px}
-.pcard-add{width:100%;padding:10px;border-radius:50px;background:linear-gradient(135deg,var(--orange),var(--pink));color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.pcard-add:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(232,0,110,.28)}
+.pcard-actions{display:grid;grid-template-columns:1fr auto;gap:8px}
+.pcard-add,.pcard-buy{padding:10px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.pcard-add{width:100%;background:linear-gradient(135deg,var(--orange),var(--pink));color:white}
+.pcard-buy{min-width:76px;background:var(--dark);color:white}
+.pcard-add:hover,.pcard-buy:hover{transform:translateY(-2px)}
+.pcard-add:hover{box-shadow:0 6px 16px rgba(232,0,110,.28)}
+.pcard-buy:hover{box-shadow:0 6px 16px rgba(26,26,46,.2)}
 .pcard-add:disabled,.btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
 .pcard-add.added{background:linear-gradient(135deg,var(--green),#00CC88)}
 
@@ -392,7 +397,7 @@ footer{background:#0F0F1E;padding:64px 60px 28px;color:rgba(255,255,255,.7)}
   .pcard-img{height:140px;font-size:56px}
   .pcard-body{padding:12px}
   .pcard-price{font-size:18px}
-  .pcard-add{font-size:12px;padding:8px}
+  .pcard-add,.pcard-buy{font-size:12px;padding:8px}
   .hero{padding:28px 16px}
   .hero-right{height:240px}
   .hero-circle{width:210px;height:210px}

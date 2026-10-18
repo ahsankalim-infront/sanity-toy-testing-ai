@@ -7,6 +7,7 @@ import { adminHeaders } from "../../components/admin/AdminShell";
 import { BarList, Donut, TrendChart } from "../../components/admin/Charts";
 
 const RANGES = [
+  [1, "1 day"],
   [7, "7 days"],
   [30, "30 days"],
   [90, "90 days"],

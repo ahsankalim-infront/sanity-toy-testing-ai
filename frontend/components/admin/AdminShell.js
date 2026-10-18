@@ -13,6 +13,7 @@ const LINKS = [
   ["/admin/categories", "Categories"],
   ["/admin/notifications", "Notifications"],
   ["/admin/orders", "Orders"],
+  ["/admin/payments", "Payment accounts"],
   ["/admin/pages", "Pages"],
   ["/admin/seo_entries", "SEO"],
   ["/admin/blog_posts", "Blog"],

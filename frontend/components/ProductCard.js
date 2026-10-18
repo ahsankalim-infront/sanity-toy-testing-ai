@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
 import ProductMedia from "./ProductMedia";
 
 export default function ProductCard({ product }) {
+  const router = useRouter();
   const { add, toggleWish, wished } = useCart();
   const off = discount(product.price, product.compare_price);
   const soldOut = Number(product.stock) <= 0;
@@ -30,9 +32,16 @@ export default function ProductCard({ product }) {
           </div>
           {off ? <span className="pcard-dis">-{off}%</span> : product.badge === "new" ? <span className="pcard-dis">Fan Fav</span> : null}
         </div>
-        <button type="button" className="pcard-add" disabled={soldOut} onClick={() => add(product)}>
-          {soldOut ? "Sold Out" : "🛒 Add to Cart"}
-        </button>
+        <div className="pcard-actions">
+          <button type="button" className="pcard-add" disabled={soldOut} onClick={() => add(product)}>
+            {soldOut ? "Sold Out" : "🛒 Add to Cart"}
+          </button>
+          {soldOut ? null : (
+            <button type="button" className="pcard-buy" onClick={() => { if (add(product)) router.push("/checkout"); }}>
+              Buy
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

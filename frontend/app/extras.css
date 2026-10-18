@@ -133,6 +133,8 @@ html.car-cursor input,html.car-cursor textarea{cursor:text}
 .checkout-success-grid span{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#999;margin-bottom:4px}
 .checkout-success-grid strong{font-size:16px}
 .field-hint{display:block;margin-top:6px;font-size:12px;font-weight:700;color:#999}
+.field-error{display:block;margin-top:6px;color:var(--red);font-size:12px;font-weight:800}
+.field.invalid input,.field.invalid textarea,.phone-modern.invalid,.city-modern.invalid{border-color:var(--red)}
 .phone-modern,.city-modern{position:relative;display:flex;align-items:center;border:2px solid #E8E4DF;border-radius:16px;background:white;min-height:52px}
 .phone-modern:focus-within,.city-modern:focus-within,.phone-modern.open,.city-modern.open{border-color:var(--orange);box-shadow:0 0 0 4px rgba(255,107,0,.12)}
 .phone-modern input,.city-modern input{border:none;background:transparent;padding:12px 14px;font-family:'Nunito',sans-serif;font-weight:700;font-size:16px;width:100%;outline:none;color:var(--dark)}
@@ -145,6 +147,19 @@ html.car-cursor input,html.car-cursor textarea{cursor:text}
 .place-menu button{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left;border:none;background:white;padding:11px 14px;font-family:inherit;font-weight:700}
 .place-menu button.on,.place-menu button:hover{background:#FFF6E8}
 .place-empty{padding:12px 14px;color:#999;font-weight:700}
+.pay-proof{margin-top:18px;padding-top:16px;border-top:1px dashed #EEE7DD}
+.pay-proof h3{font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:12px}
+.pay-account{border:2px solid #EEE7DD;border-radius:16px;padding:14px 16px;margin:12px 0}
+.pay-account.on{border-color:var(--orange);background:#FFF7EE}
+.pay-account-pick{display:flex;align-items:center;gap:8px;font-weight:800;margin-bottom:10px}
+.pay-account-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+.pay-account-info .wide{grid-column:1/-1}
+.pay-account-info dt{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#999;margin-bottom:2px}
+.pay-account-info dd{font-weight:800;margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pay-account-info b{font-size:18px;letter-spacing:.3px}
+.pay-copy{border:none;background:#FFE8D2;color:var(--orange);border-radius:999px;padding:4px 10px;font-weight:800;font-size:12px;font-family:inherit;cursor:pointer}
+@media (max-width:720px){.pay-account-info{grid-template-columns:1fr}}
+.pay-proof-preview{display:block;width:min(280px,100%);height:180px;object-fit:cover;border-radius:14px;margin-top:10px;background:#faf8f4}
 
 /* Help centre and company pages */
 .cms-hero{padding-top:44px;padding-bottom:44px;position:relative;overflow:hidden}

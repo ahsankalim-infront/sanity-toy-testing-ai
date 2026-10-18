@@ -38,6 +38,10 @@ export async function api(path, options = {}) {
     body: options.body && typeof options.body !== "string" && !isForm ? JSON.stringify(options.body) : options.body,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Request failed");
+  if (!response.ok) {
+    const error = new Error(data.error || "Request failed");
+    error.fields = data.fields || null;
+    throw error;
+  }
   return data;
 }

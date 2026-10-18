@@ -74,5 +74,5 @@ export default function NotificationsPage() {
 }
 
 function icon(type) {
-  return { order: "📦", inquiry: "💬", review: "⭐", newsletter: "✉️", stock: "⚠️" }[type] || "🔔";
+  return { order: "📦", inquiry: "💬", review: "⭐", newsletter: "✉️", stock: "⚠️", payment: "🧾" }[type] || "🔔";
 }

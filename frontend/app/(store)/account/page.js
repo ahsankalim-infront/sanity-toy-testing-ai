@@ -99,12 +99,12 @@ export default function AccountPage() {
       ) : null}
       <div className="table-wrap" style={{ marginTop: 18 }}>
         <table className="data">
-          <thead><tr><th>Order</th><th>Status</th><th>City</th><th>Total</th></tr></thead>
+          <thead><tr><th>Order</th><th>Status</th><th>Payment</th><th>City</th><th>Total</th></tr></thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id}><td>{order.order_no}</td><td>{order.status}</td><td>{order.city}</td><td>{pkr(order.total)}</td></tr>
+              <tr key={order.id}><td>{order.order_no}</td><td>{order.status}</td><td>{order.payment_status === "submitted" ? "Receipt under review" : order.payment_status === "verified" ? "Payment confirmed" : order.payment_status === "rejected" ? "Receipt rejected" : order.payment_method}</td><td>{order.city}</td><td>{pkr(order.total)}</td></tr>
             ))}
-            {!orders.length ? <tr><td colSpan={4}>No orders yet.</td></tr> : null}
+            {!orders.length ? <tr><td colSpan={5}>No orders yet.</td></tr> : null}
           </tbody>
         </table>
       </div>

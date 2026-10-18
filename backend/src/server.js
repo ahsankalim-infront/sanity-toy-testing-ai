@@ -29,7 +29,9 @@ const SECRET = process.env.JWT_SECRET || "kidlo-dev-secret";
 const store = new DualStore();
 const UPLOAD_ROOT = process.env.UPLOAD_DIR || (process.env.VERCEL ? path.join("/tmp", "kidlo-uploads") : path.join(__dirname, "..", "uploads"));
 const PRODUCT_UPLOAD_DIR = path.join(UPLOAD_ROOT, "products");
+const PAYMENT_UPLOAD_DIR = path.join(UPLOAD_ROOT, "payments");
 fs.mkdirSync(PRODUCT_UPLOAD_DIR, { recursive: true });
+fs.mkdirSync(PAYMENT_UPLOAD_DIR, { recursive: true });
 
 const IMAGE_TYPES = {
   "image/jpeg": ".jpg",
@@ -37,27 +39,32 @@ const IMAGE_TYPES = {
   "image/webp": ".webp",
   "image/gif": ".gif",
 };
-const uploadProductImage = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, done) => done(null, PRODUCT_UPLOAD_DIR),
-    filename: (_req, file, done) => {
-      const base = path.basename(file.originalname, path.extname(file.originalname))
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-        .slice(0, 50) || "product";
-      done(null, `${base}-${crypto.randomUUID().slice(0, 8)}${IMAGE_TYPES[file.mimetype] || ""}`);
+function imageUploader(folder, prefix) {
+  return multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, done) => done(null, folder),
+      filename: (_req, file, done) => {
+        const base = path.basename(file.originalname, path.extname(file.originalname))
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
+          .slice(0, 50) || prefix;
+        done(null, `${base}-${crypto.randomUUID().slice(0, 8)}${IMAGE_TYPES[file.mimetype] || ""}`);
+      },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+    fileFilter: (_req, file, done) => {
+      if (!IMAGE_TYPES[file.mimetype]) return done(new Error("Upload a JPG, PNG, WebP, or GIF image"));
+      done(null, true);
     },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (_req, file, done) => {
-    if (!IMAGE_TYPES[file.mimetype]) return done(new Error("Upload a JPG, PNG, WebP, or GIF image"));
-    done(null, true);
-  },
-});
+  });
+}
+const uploadProductImage = imageUploader(PRODUCT_UPLOAD_DIR, "product");
+const uploadPaymentProof = imageUploader(PAYMENT_UPLOAD_DIR, "payment");
 
 const PUBLIC_TABLES = ["categories", "products", "sections", "pages", "blog_posts", "reviews", "coupons"];
-const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities", "seo_entries", "media_files", "notifications", "games", "game_plays", "coin_transactions"];
+const ADMIN_TABLES = [...PUBLIC_TABLES, "orders", "order_items", "customers", "newsletter", "inquiries", "admins", "countries", "cities", "seo_entries", "media_files", "notifications", "games", "game_plays", "coin_transactions", "payment_accounts"];
+const PROOF_METHODS = new Set(["easypaisa", "jazzcash", "bank"]);
 const GAME_TYPES = ["spin", "box", "snake", "cars"];
 const SKILL_TYPES = new Set(["snake", "cars"]);
 const SKILL_PLAY_MS = 12 * 60 * 1000;
@@ -116,6 +123,22 @@ function productsForCategory(category) {
     return products.filter((row) => row.gender === gender || slugs.has(row.category_slug));
   }
   return products.filter((row) => slugs.has(row.category_slug));
+}
+
+function publicPaymentAccounts() {
+  return store.all("payment_accounts")
+    .filter((row) => row.enabled && PROOF_METHODS.has(row.method))
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((row) => ({
+      id: row.id,
+      method: row.method,
+      title: row.title,
+      account_name: row.account_name,
+      account_number: row.account_number,
+      bank_name: row.bank_name,
+      iban: row.iban,
+      instructions: row.instructions,
+    }));
 }
 
 function publicHome() {
@@ -334,6 +357,38 @@ function nationalNumber(raw, country) {
   return value;
 }
 
+const PAYMENT_METHODS = ["cod", "card", "easypaisa", "jazzcash", "bank"];
+
+function checkoutDetails(body, country) {
+  const name = String(body.customer_name || "").trim();
+  const email = String(body.email || "").trim().toLowerCase();
+  const address = String(body.address || "").trim();
+  const city = String(body.city || "").trim();
+  const notes = String(body.notes || "").trim();
+  const coupon = String(body.coupon_code || "").trim().toUpperCase();
+  const national = country ? nationalNumber(body.phone, country) : "";
+  const errors = {};
+  if (name.length < 2 || !/\p{L}/u.test(name)) errors.customer_name = "Enter the full name for delivery";
+  else if (name.length > 80) errors.customer_name = "Name must be 80 characters or less";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 120) errors.email = "Enter a valid email address";
+  if (address.length < 8) errors.address = "Enter the house number, street, and area";
+  else if (address.length > 180) errors.address = "Address must be 180 characters or less";
+  if (city.length < 2 || city.length > 60) errors.city = "Enter a city";
+  if (!country) errors.phone = "Choose a country for the mobile number";
+  else if (national.length !== Number(country.digits)) errors.phone = `Enter a ${country.digits}-digit ${country.name} mobile number`;
+  if (!PAYMENT_METHODS.includes(body.payment_method || "cod")) errors.payment_method = "Choose a payment method";
+  if (notes.length > 240) errors.notes = "Gift note must be 240 characters or less";
+  if (coupon && !/^[A-Z0-9]{3,20}$/.test(coupon)) errors.coupon_code = "Promo codes use 3 to 20 letters or numbers";
+  const txn = String(body.payment_txn || "").trim();
+  const proof = String(body.payment_proof_url || "").trim();
+  if (PROOF_METHODS.has(body.payment_method)) {
+    if (!Number(body.payment_account_id)) errors.payment_account_id = "Choose the account you paid to";
+    if (!/^\/api\/media\/payments\/[A-Za-z0-9._-]+$/.test(proof)) errors.payment_proof_url = "Upload a screenshot or receipt of the payment";
+    if (txn && !/^[A-Za-z0-9-]{4,32}$/.test(txn)) errors.payment_txn = "Enter the transaction ID from your receipt";
+  }
+  return { errors, name, email, address, city, notes, coupon, national, txn, proof };
+}
+
 async function upgradeData() {
   const hero = store.all("sections").find((row) => row.section_key === "hero");
   if (hero && !Array.isArray(hero.payload?.images)) {
@@ -400,6 +455,11 @@ async function upgradeData() {
     }
     store.data.meta.coins_per_game_limit = 1;
     store.writeFile(store.data);
+  }
+  if (!store.all("payment_accounts").length && !store.data.meta.payment_accounts_seeded) {
+    store.data.payment_accounts = seed.payment_accounts;
+    store.data.meta.payment_accounts_seeded = 1;
+    await store.persist("payment_accounts");
   }
   if (!store.data.meta.demo_orders && store.all("orders").length <= 1 && process.env.DEMO_ORDERS !== "0") {
     const rules = sectionMap().commerce?.payload || {};
@@ -528,6 +588,21 @@ async function main() {
     res.json({ ok: true, ...store.status() });
   });
 
+  app.get("/api/payments", (_req, res) => {
+    res.json({ accounts: publicPaymentAccounts(), methods: [...PROOF_METHODS] });
+  });
+
+  app.post("/api/checkout/payment-proof", (req, res) => {
+    uploadPaymentProof.single("file")(req, res, (err) => {
+      if (err) {
+        const message = err.code === "LIMIT_FILE_SIZE" ? "Receipt must be 5 MB or smaller" : err.message;
+        return res.status(400).json({ error: message });
+      }
+      if (!req.file) return res.status(400).json({ error: "Choose a screenshot or receipt to upload" });
+      res.json({ url: `/api/media/payments/${req.file.filename}`, file_name: req.file.filename });
+    });
+  });
+
   app.get("/api/places", (_req, res) => {
     const countries = store.all("countries").filter((row) => row.active).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
     const cities = store.all("cities").filter((row) => row.active).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
@@ -537,7 +612,7 @@ async function main() {
   app.get("/api/home", (_req, res) => res.json(publicHome()));
   app.get("/api/shell", (_req, res) => {
     const home = publicHome();
-    res.json({ ...store.status(), sections: home.sections, categories: home.categories });
+    res.json({ ...store.status(), sections: home.sections, categories: home.categories, payment_accounts: publicPaymentAccounts() });
   });
 
   app.get("/api/catalog", (req, res) => {
@@ -680,14 +755,17 @@ async function main() {
     const body = req.body || {};
     const items = Array.isArray(body.items) ? body.items : [];
     const country = store.all("countries").find((row) => row.active && row.code === String(body.country_code || "PK").toUpperCase());
-    if (!body.customer_name || !body.phone || !body.address || !body.city || !country) {
-      return res.status(400).json({ error: "Name, phone, address, city, and country are required" });
+    const details = checkoutDetails(body, country);
+    const method = body.payment_method || "cod";
+    let account = null;
+    if (PROOF_METHODS.has(method)) {
+      account = store.all("payment_accounts").find((row) => row.enabled && row.method === method && Number(row.id) === Number(body.payment_account_id));
+      if (!account) details.errors.payment_account_id = "Choose a live Kidlo account for this payment method";
     }
-    const national = nationalNumber(body.phone, country);
-    if (national.length !== Number(country.digits)) {
-      return res.status(400).json({ error: `Enter a ${country.digits}-digit ${country.name} mobile number` });
+    if (Object.keys(details.errors).length) {
+      return res.status(400).json({ error: Object.values(details.errors)[0], fields: details.errors });
     }
-    const phone = country.code === "PK" ? `0${national}` : national;
+    const phone = country.code === "PK" ? `0${details.national}` : details.national;
     if (!items.length) return res.status(400).json({ error: "Your cart is empty" });
     const lines = [];
     let subtotal = 0;
@@ -702,8 +780,8 @@ async function main() {
     const rules = sectionMap().commerce?.payload || { free_shipping_over: 2000, shipping_fee: 199 };
     let discount = 0;
     let couponCode = "";
-    if (body.coupon_code) {
-      const coupon = store.all("coupons").find((row) => row.active && row.code.toUpperCase() === String(body.coupon_code).toUpperCase());
+    if (details.coupon) {
+      const coupon = store.all("coupons").find((row) => row.active && row.code.toUpperCase() === details.coupon);
       if (coupon && subtotal >= coupon.min_order) {
         discount = coupon.type === "flat" ? Math.min(coupon.value, subtotal) : Math.round(subtotal * (coupon.value / 100));
         couponCode = coupon.code;
@@ -738,16 +816,22 @@ async function main() {
     const total = Math.max(0, subtotal - discount - coinsDiscount + shipping);
     const order = await store.insert("orders", {
       order_no: orderNo,
-      customer_name: body.customer_name,
-      email: body.email || "",
+      customer_name: details.name,
+      email: details.email,
       phone,
-      address: body.address,
-      city: body.city,
+      address: details.address,
+      city: details.city,
       country_code: country.code,
       country_name: country.name,
       dial_code: country.dial,
-      payment_method: body.payment_method || "cod",
-      status: "Placed",
+      payment_method: method,
+      status: PROOF_METHODS.has(method) ? "Payment pending" : "Placed",
+      payment_status: PROOF_METHODS.has(method) ? "submitted" : "",
+      payment_account_id: account?.id || 0,
+      payment_account_label: account ? `${account.title} · ${account.account_name} · ${account.account_number}` : "",
+      payment_txn: details.txn,
+      payment_proof_url: details.proof,
+      payment_note: "",
       subtotal,
       shipping,
       discount,
@@ -757,7 +841,7 @@ async function main() {
       coins_used: coinsUsed,
       coins_discount: coinsDiscount,
       coins_refunded: 0,
-      notes: body.notes || "",
+      notes: details.notes,
       created_at: new Date().toISOString(),
     });
     const savedItems = [];
@@ -781,7 +865,12 @@ async function main() {
         await notify({ type: "stock", title: `${line.product.name} is low on stock`, body: `${nextStock} left`, href: "/admin/products" });
       }
     }
-    await notify({ type: "order", title: `Order ${order.order_no} placed`, body: `${order.customer_name} · ${order.city} · PKR ${order.total}${coinsUsed ? ` · ${coinsUsed} coins used` : ""}`, href: "/admin/orders" });
+    await notify({
+      type: PROOF_METHODS.has(method) ? "payment" : "order",
+      title: PROOF_METHODS.has(method) ? `Payment proof for ${order.order_no}` : `Order ${order.order_no} placed`,
+      body: `${order.customer_name} · ${order.city} · PKR ${order.total}${account ? ` · ${account.title}` : ""}`,
+      href: "/admin/orders",
+    });
     res.json({ order, items: savedItems, coins: customer ? Number(store.get("customers", customer.id).coins) || 0 : null });
   });
 
@@ -980,6 +1069,26 @@ async function main() {
       wins: plays.filter((row) => row.result === "win").length,
       players: new Set(plays.map((row) => row.customer_id)).size,
     });
+  });
+
+  app.post("/api/admin/orders/:id/payment", requireAdmin, async (req, res) => {
+    const order = store.get("orders", req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (!PROOF_METHODS.has(order.payment_method)) return res.status(400).json({ error: "This order does not need payment proof" });
+    const next = String(req.body?.status || "");
+    if (!["verified", "rejected"].includes(next)) return res.status(400).json({ error: "Mark the payment as verified or rejected" });
+    const row = await store.update("orders", order.id, {
+      payment_status: next,
+      payment_note: String(req.body?.note || "").trim().slice(0, 180),
+      status: next === "verified" && order.status === "Payment pending" ? "Processing" : order.status,
+    });
+    await notify({
+      type: "payment",
+      title: next === "verified" ? `Payment verified for ${order.order_no}` : `Payment rejected for ${order.order_no}`,
+      body: `${order.customer_name} · PKR ${order.total}`,
+      href: "/admin/orders",
+    });
+    res.json({ row });
   });
 
   app.post("/api/admin/notifications/read-all", requireAdmin, async (_req, res) => {

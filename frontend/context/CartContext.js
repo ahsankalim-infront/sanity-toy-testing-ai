@@ -40,12 +40,12 @@ export function CartProvider({ children }) {
     const stock = Number(product.stock ?? existing?.stock ?? 99);
     if (stock <= 0) {
       toast("This toy is sold out");
-      return;
+      return false;
     }
     const nextQty = Math.min(stock, (existing?.qty || 0) + qty);
     if (existing && nextQty === existing.qty) {
       toast(`Only ${stock} in stock`);
-      return;
+      return false;
     }
     setCart((list) => {
       const found = list.find((item) => item.id === product.id);
@@ -53,6 +53,7 @@ export function CartProvider({ children }) {
       return [...list, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, image_url: product.image_url || "", image_alt: product.image_alt || "", price: product.price, gradient: product.gradient, qty: nextQty, stock }];
     });
     toast(`${product.name} added to cart`);
+    return true;
   }
 
   function setQty(id, qty) {

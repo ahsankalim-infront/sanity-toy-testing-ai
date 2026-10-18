@@ -161,8 +161,29 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `coins_used` INT NULL,
   `coins_discount` INT NULL,
   `coins_refunded` TINYINT NULL,
+  `payment_status` VARCHAR(255) NULL,
+  `payment_account_id` INT NULL,
+  `payment_account_label` VARCHAR(255) NULL,
+  `payment_txn` VARCHAR(255) NULL,
+  `payment_proof_url` VARCHAR(255) NULL,
+  `payment_note` VARCHAR(255) NULL,
   `notes` TEXT NULL,
   `created_at` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `payment_accounts` (
+  `id` INT NULL,
+  `method` VARCHAR(255) NULL,
+  `title` VARCHAR(255) NULL,
+  `account_name` VARCHAR(255) NULL,
+  `account_number` VARCHAR(255) NULL,
+  `bank_name` VARCHAR(255) NULL,
+  `iban` VARCHAR(255) NULL,
+  `instructions` TEXT NULL,
+  `enabled` TINYINT NULL,
+  `sort_order` INT NULL,
+  `updated_at` VARCHAR(255) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
