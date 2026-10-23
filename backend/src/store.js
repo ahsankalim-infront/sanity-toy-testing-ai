@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { TABLES, columnSql, schemaSql } = require("./schema");
+const { TABLES, columnSql, schemaSql, sqlForTable } = require("./schema");
 const { buildSeed } = require("./seed");
 
 const DATA_DIR = path.join(__dirname, "..", "data");
@@ -70,6 +70,7 @@ class DualStore {
     this.mysqlUp = false;
     this.lastError = "";
     this.lastTry = 0;
+    this.connecting = null;
   }
 
   status() {
@@ -141,6 +142,14 @@ class DualStore {
   }
 
   async tryConnect() {
+    if (this.connecting) return this.connecting;
+    this.connecting = this.connectOnce().finally(() => {
+      this.connecting = null;
+    });
+    return this.connecting;
+  }
+
+  async connectOnce() {
     this.lastTry = Date.now();
     const host = process.env.MYSQL_HOST || "127.0.0.1";
     const user = process.env.MYSQL_USER || "root";
@@ -184,7 +193,7 @@ class DualStore {
         password,
         database,
         waitForConnections: true,
-        connectionLimit: 4,
+        connectionLimit: 8,
         connectTimeout: 2500,
       });
       await this.pool.query("SELECT 1");
@@ -203,7 +212,7 @@ class DualStore {
       setTimeout(() => {
         stale = true;
         resolve("timeout");
-      }, 4000);
+      }, 8000);
     });
     try {
       const result = await Promise.race([attempt, timeout]);
@@ -225,6 +234,7 @@ class DualStore {
   }
 
   async ensureMysql() {
+    if (this.connecting) return this.connecting;
     if (this.mysqlUp && this.pool) {
       try {
         await this.pool.query("SELECT 1");
@@ -239,10 +249,8 @@ class DualStore {
   }
 
   async ensureTables() {
-    for (const statement of schemaSql().split(";").map((s) => s.trim()).filter((s) => s.startsWith("CREATE"))) {
-      await this.pool.query(statement);
-    }
     for (const name of Object.keys(TABLES)) {
+      await this.pool.query(sqlForTable(name));
       const [cols] = await this.pool.query(`SHOW COLUMNS FROM \`${name}\``);
       const have = new Set(cols.map((col) => col.Field));
       for (const [col, type] of TABLES[name]) {
@@ -253,26 +261,34 @@ class DualStore {
 
   async reconcile() {
     const pending = new Set(this.data.meta.pending_tables || []);
-    const [countRows] = await this.pool.query("SELECT COUNT(*) AS c FROM products");
-    const mysqlEmpty = Number(countRows[0].c) === 0;
-    if (mysqlEmpty) {
-      for (const name of Object.keys(TABLES)) await this.pushTable(name);
-    } else if (pending.size) {
-      for (const name of pending) await this.pushTable(name);
-    }
-    if (!mysqlEmpty || pending.size) {
-      for (const name of Object.keys(TABLES)) this.data[name] = await this.pullTable(name);
-    } else {
-      for (const name of Object.keys(TABLES)) this.data[name] = await this.pullTable(name);
+    for (const name of Object.keys(TABLES)) {
+      if (!TABLES[name]) continue;
+      const [countRows] = await this.pool.query(`SELECT COUNT(*) AS c FROM \`${name}\``);
+      const mysqlEmpty = Number(countRows[0].c) === 0;
+      const jsonHas = (this.data[name] || []).length > 0;
+      if (pending.has(name) || (mysqlEmpty && jsonHas)) {
+        await this.pushTable(name);
+      }
+      this.data[name] = await this.pullTable(name);
     }
     this.data.meta.pending_tables = [];
     this.writeFile(this.data);
   }
 
   async pushTable(name) {
-    await this.pool.query(`DELETE FROM \`${name}\``);
-    for (const row of this.data[name] || []) {
-      await this.replaceRow(name, normalizeRow(name, row));
+    const conn = await this.pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.query(`DELETE FROM \`${name}\``);
+      for (const row of this.data[name] || []) {
+        await this.replaceRow(name, normalizeRow(name, row), conn);
+      }
+      await conn.commit();
+    } catch (err) {
+      try { await conn.rollback(); } catch { /* ignore */ }
+      throw err;
+    } finally {
+      conn.release();
     }
   }
 
@@ -281,11 +297,11 @@ class DualStore {
     return rows.map((row) => normalizeRow(name, row));
   }
 
-  async replaceRow(name, row) {
+  async replaceRow(name, row, conn = this.pool) {
     const cols = TABLES[name].map(([col]) => col);
     const sql = `REPLACE INTO \`${name}\` (${cols.map((c) => `\`${c}\``).join(",")}) VALUES (${cols.map(() => "?").join(",")})`;
     const values = TABLES[name].map(([col, type]) => toSql(type, row[col]));
-    await this.pool.query(sql, values);
+    await conn.query(sql, values);
   }
 
   all(name) {
@@ -327,32 +343,36 @@ class DualStore {
   }
 
   async persist(name) {
+    if (!TABLES[name]) throw new Error(`Unknown table ${name}`);
+    const pending = new Set(this.data.meta.pending_tables || []);
+    pending.add(name);
+    this.data.meta.pending_tables = [...pending];
+    this.writeFile(this.data);
     const up = await this.ensureMysql();
-    if (!up) {
-      const pending = new Set(this.data.meta.pending_tables || []);
-      pending.add(name);
-      this.data.meta.pending_tables = [...pending];
-      this.writeFile(this.data);
-      return;
-    }
+    if (!up) return;
+    let conn;
     try {
-      const rowIds = new Set(this.data[name].map((row) => Number(row.id)));
-      const existing = await this.pullTable(name);
+      conn = await this.pool.getConnection();
+      await conn.beginTransaction();
+      const [existing] = await conn.query(`SELECT id FROM \`${name}\``);
+      const rowIds = new Set((this.data[name] || []).map((row) => Number(row.id)));
       for (const old of existing) {
-        if (!rowIds.has(Number(old.id))) await this.pool.query(`DELETE FROM \`${name}\` WHERE id = ?`, [old.id]);
+        if (!rowIds.has(Number(old.id))) await conn.query(`DELETE FROM \`${name}\` WHERE id = ?`, [old.id]);
       }
-      for (const row of this.data[name]) await this.replaceRow(name, row);
-      const pending = new Set(this.data.meta.pending_tables || []);
-      pending.delete(name);
-      this.data.meta.pending_tables = [...pending];
+      for (const row of this.data[name] || []) await this.replaceRow(name, row, conn);
+      await conn.commit();
+      this.data.meta.pending_tables = (this.data.meta.pending_tables || []).filter((table) => table !== name);
       this.writeFile(this.data);
     } catch (err) {
+      if (conn) {
+        try { await conn.rollback(); } catch { /* ignore */ }
+      }
       this.mysqlUp = false;
       this.lastError = err.message;
-      const pending = new Set(this.data.meta.pending_tables || []);
-      pending.add(name);
-      this.data.meta.pending_tables = [...pending];
+      this.data.meta.pending_tables = [...new Set([...(this.data.meta.pending_tables || []), name])];
       this.writeFile(this.data);
+    } finally {
+      if (conn) conn.release();
     }
   }
 }

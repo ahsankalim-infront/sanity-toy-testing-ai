@@ -1,27 +1,6 @@
 {
   "meta": {
-    "pending_tables": [
-      "sections",
-      "orders",
-      "order_items",
-      "countries",
-      "cities",
-      "products",
-      "seo_entries",
-      "media_files",
-      "inquiries",
-      "notifications",
-      "games",
-      "customers",
-      "coin_transactions",
-      "game_plays",
-      "blog_posts",
-      "categories",
-      "pages",
-      "coupons",
-      "reviews",
-      "payment_accounts"
-    ],
+    "pending_tables": [],
     "demo_orders": 90,
     "games_seeded": 1,
     "chance_daily_once": 1,
@@ -541,9 +520,9 @@
       "compare_price": 3500,
       "badge": "hot",
       "rating": 5,
-      "review_count": 128,
-      "stock": 36,
-      "sold": 210,
+      "review_count": 2,
+      "stock": 35,
+      "sold": 211,
       "description": "A fast remote-control racer with grippy tyres and a 2.4GHz controller built for living-room laps and driveway races.",
       "gradient": "linear-gradient(135deg,#E8F0FF,#C8DCFF)",
       "brand": "TurboKids",
@@ -553,7 +532,7 @@
       "is_deal": 0,
       "active": 1,
       "created_at": "2025-08-01T10:00:00.000Z",
-      "updated_at": "2026-10-15T05:59:28.603Z"
+      "updated_at": "2026-10-23T04:51:27.814Z"
     },
     {
       "id": 2,
@@ -10630,6 +10609,43 @@
       "sort_order": 2
     }
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": 1,
+      "type": "newsletter",
+      "title": "New newsletter subscriber",
+      "body": "mysql-verify-1792731086397@kidlo.test",
+      "href": "/admin/newsletter",
+      "read": 1,
+      "created_at": "2026-10-23T04:51:26.816Z"
+    },
+    {
+      "id": 2,
+      "type": "inquiry",
+      "title": "New contact message",
+      "body": "MySQL Verify: Please confirm MySQL inquiry write.",
+      "href": "/admin/inquiries",
+      "read": 1,
+      "created_at": "2026-10-23T04:51:26.903Z"
+    },
+    {
+      "id": 3,
+      "type": "review",
+      "title": "New review from MySQL Parent",
+      "body": "Confirming reviews persist in MySQL.",
+      "href": "/admin/reviews",
+      "read": 1,
+      "created_at": "2026-10-23T04:51:27.044Z"
+    },
+    {
+      "id": 5,
+      "type": "payment",
+      "title": "Payment verified for KD1093",
+      "body": "MySQL Buyer · PKR 2799",
+      "href": "/admin/orders",
+      "read": 1,
+      "created_at": "2026-10-23T04:51:27.987Z"
+    }
+  ],
   "inquiries": []
 }

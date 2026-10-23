@@ -312,4 +312,4 @@ function schemaSql() {
   return `-- Kidlo parallel schema. JSON collections use the same table and column names.\n${Object.keys(TABLES).map(sqlForTable).join("\n\n")}\n`;
 }
 
-module.exports = { TABLES, SQL_TYPE, columnSql, schemaSql };
+module.exports = { TABLES, SQL_TYPE, columnSql, schemaSql, sqlForTable };

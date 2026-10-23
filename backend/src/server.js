@@ -581,7 +581,12 @@ async function main() {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
+  app.use(express.urlencoded({ extended: true }));
   app.use("/api/media", express.static(UPLOAD_ROOT, { maxAge: "7d" }));
+  app.use("/api", async (_req, _res, next) => {
+    try { await store.ensureMysql(); } catch { /* JSON fallback stays available */ }
+    next();
+  });
 
   app.get("/api/health", async (_req, res) => {
     await store.ensureMysql();
@@ -1151,7 +1156,7 @@ async function main() {
     res.json({ row });
   });
 
-  app.put("/api/admin/:table/:id", requireAdmin, async (req, res) => {
+  async function saveAdminRow(req, res) {
     const table = req.params.table;
     if (!ADMIN_TABLES.includes(table)) return res.status(404).json({ error: "Unknown collection" });
     const input = { ...req.body };
@@ -1195,7 +1200,10 @@ async function main() {
       row = await store.update("orders", row.id, { coins_refunded: 1 });
     }
     res.json({ row: stripSecrets([row])[0] });
-  });
+  }
+
+  app.put("/api/admin/:table/:id", requireAdmin, saveAdminRow);
+  app.patch("/api/admin/:table/:id", requireAdmin, saveAdminRow);
 
   app.delete("/api/admin/:table/:id", requireAdmin, async (req, res) => {
     const table = req.params.table;
