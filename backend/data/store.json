@@ -1,6 +1,8 @@
 {
   "meta": {
-    "pending_tables": [],
+    "pending_tables": [
+      "sections"
+    ],
     "demo_orders": 90,
     "games_seeded": 1,
     "chance_daily_once": 1,
@@ -2047,6 +2049,44 @@
         "button": "Play now"
       },
       "updated_at": "2026-10-15T05:58:58.455Z"
+    },
+    {
+      "id": 26,
+      "section_key": "google_marketing",
+      "name": "Google Search Console & Ads",
+      "enabled": 1,
+      "sort_order": 26,
+      "payload": {
+        "site_verification": "",
+        "ga4_measurement_id": "",
+        "gtm_container_id": "",
+        "google_ads_conversion_id": "",
+        "google_ads_conversion_label": "",
+        "prefer_gtm": 0,
+        "track_purchase": 1,
+        "notes": "Add your Search Console verification token, GA4 or GTM ID, and optional Google Ads conversion tag."
+      },
+      "updated_at": "2026-10-26T17:14:06.656Z"
+    },
+    {
+      "id": 27,
+      "section_key": "meta_ads",
+      "name": "Meta Ads & Pixel",
+      "enabled": 1,
+      "sort_order": 27,
+      "payload": {
+        "pixel_id": "",
+        "test_event_code": "",
+        "capi_access_token": "",
+        "capi_enabled": 0,
+        "track_page_view": 1,
+        "track_view_content": 1,
+        "track_add_to_cart": 1,
+        "track_initiate_checkout": 1,
+        "track_purchase": 1,
+        "notes": "Connect Meta Pixel for ads and remarketing. Optional Conversions API token improves attribution when browsers block cookies."
+      },
+      "updated_at": "2025-08-01T10:00:00.000Z"
     }
   ],
   "pages": [

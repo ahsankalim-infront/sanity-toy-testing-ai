@@ -61,7 +61,7 @@ export default function SectionSettings({ sectionKey, title, fields, enabledLabe
                   <textarea rows={3} value={draft.payload?.[field.key] ?? ""} onChange={(event) => setField(field.key, event.target.value)} placeholder={field.placeholder} />
                 ) : (
                   <input
-                    type={field.type === "number" ? "number" : "text"}
+                    type={field.type === "number" ? "number" : field.type === "password" ? "password" : "text"}
                     min={field.min}
                     max={field.max}
                     value={draft.payload?.[field.key] ?? ""}

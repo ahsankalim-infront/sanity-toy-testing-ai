@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, pkr } from "../../../lib/format";
 import { useCart } from "../../../context/CartContext";
 import { CityField, PhoneField } from "../../../components/PlaceFields";
 import ProductMedia from "../../../components/ProductMedia";
+import { trackInitiateCheckout, trackPurchase } from "../../../lib/marketing";
 
 const EMPTY = { customer_name: "", email: "", phone: "", address: "", city: "Lahore", country_code: "PK", payment_method: "cod", coupon_code: "", notes: "", payment_account_id: 0, payment_txn: "", payment_proof_url: "" };
 const PROOF_METHODS = new Set(["easypaisa", "jazzcash", "bank"]);
@@ -62,7 +63,8 @@ export default function CheckoutPage() {
   const [discount, setDiscount] = useState(0);
   const [message, setMessage] = useState("");
   const [messageOk, setMessageOk] = useState(false);
-  const [order, setOrder] = useState(null);
+  const [placed, setPlaced] = useState(null);
+  const checkoutTracked = useRef(false);
   const [placing, setPlacing] = useState(false);
   const [rules, setRules] = useState({ free_shipping_over: 2000, shipping_fee: 199, cod_note: "" });
   const [places, setPlaces] = useState({ countries: [], cities: [] });
@@ -120,6 +122,12 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!ready || !cart.length || placed || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackInitiateCheckout(cart, total);
+  }, [ready, cart, placed, total]);
+
   function set(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: "" }));
@@ -174,7 +182,8 @@ export default function CheckoutPage() {
           items: cart.map((item) => ({ product_id: item.id, qty: item.qty })),
         },
       });
-      setOrder(result.order);
+      setPlaced({ order: result.order, items: result.items || [] });
+      trackPurchase(result.order, result.items || []);
       clear();
     } catch (err) {
       setMessageOk(false);
@@ -184,7 +193,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (order) return <OrderPlaced order={order} />;
+  if (placed) return <OrderPlaced order={placed.order} />;
   if (!ready) {
     return (
       <div className="page-body">

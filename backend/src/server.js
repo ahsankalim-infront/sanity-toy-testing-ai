@@ -8,6 +8,7 @@ const { DualStore } = require("./store");
 const { buildSeed, hashPassword, verifyPassword } = require("./seed");
 const { demoOrders } = require("./demo");
 const { buildPlaces } = require("./places");
+const { marketingPublic, adminGoogleMarketing, normalizeGooglePatch, sendMetaCapiPurchase } = require("./marketing");
 
 const HERO_IMAGES = [
   { src: "/hero/teddy.jpg", label: "Rainbow Teddy" },
@@ -617,7 +618,22 @@ async function main() {
   app.get("/api/home", (_req, res) => res.json(publicHome()));
   app.get("/api/shell", (_req, res) => {
     const home = publicHome();
-    res.json({ ...store.status(), sections: home.sections, categories: home.categories, payment_accounts: publicPaymentAccounts() });
+    res.json({
+      ...store.status(),
+      sections: home.sections,
+      categories: home.categories,
+      payment_accounts: publicPaymentAccounts(),
+      marketing: marketingPublic(home.sections),
+    });
+  });
+
+  app.get("/api/marketing", (_req, res) => {
+    const sections = store.all("sections").filter((row) => row.enabled);
+    res.json({ ...marketingPublic(sections), ...store.status() });
+  });
+
+  app.get("/api/admin/marketing/google", requireAdmin, (_req, res) => {
+    res.json(adminGoogleMarketing(store.all("sections")));
   });
 
   app.get("/api/catalog", (req, res) => {
@@ -876,6 +892,16 @@ async function main() {
       body: `${order.customer_name} · ${order.city} · PKR ${order.total}${account ? ` · ${account.title}` : ""}`,
       href: "/admin/orders",
     });
+    try {
+      await sendMetaCapiPurchase({
+        order,
+        items: savedItems,
+        sections: store.all("sections"),
+        eventSourceUrl: String(req.headers.referer || req.headers.origin || ""),
+      });
+    } catch (capiErr) {
+      console.error("Meta CAPI purchase:", capiErr.message);
+    }
     res.json({ order, items: savedItems, coins: customer ? Number(store.get("customers", customer.id).coins) || 0 : null });
   });
 
@@ -1180,6 +1206,17 @@ async function main() {
     }
     const before = store.get(table, req.params.id);
     if (!before) return res.status(404).json({ error: "Not found" });
+    if (table === "sections" && before.section_key === "google_marketing" && input.payload) {
+      input.payload = normalizeGooglePatch(input.payload);
+      const ga4 = String(input.payload.ga4_measurement_id || "");
+      const gtm = String(input.payload.gtm_container_id || "");
+      if (ga4 && !/^G-[A-Z0-9]+$/i.test(ga4)) {
+        return res.status(400).json({ error: "GA4 measurement ID should look like G-XXXXXXXXXX" });
+      }
+      if (gtm && !/^GTM-[A-Z0-9]+$/i.test(gtm)) {
+        return res.status(400).json({ error: "GTM container ID should look like GTM-XXXXXXX" });
+      }
+    }
     if (SLUG_TABLES[table] && "slug" in input) {
       input.slug = uniqueSlug(table, input.slug || input[SLUG_TABLES[table]] || before[SLUG_TABLES[table]], before.id);
     }

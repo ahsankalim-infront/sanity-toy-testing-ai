@@ -8,6 +8,7 @@ import { api, discount, pkr, stars } from "../lib/format";
 import { useCart } from "../context/CartContext";
 import ProductMedia from "./ProductMedia";
 import { WhatsAppProductButton } from "./WhatsApp";
+import { trackViewContent } from "../lib/marketing";
 
 function remember(id) {
   try {
@@ -30,11 +31,13 @@ export default function ProductView({ slug, initial = null }) {
     if (initial?.product?.slug === slug) {
       setData(initial);
       remember(initial.product.id);
+      trackViewContent(initial.product);
       return;
     }
     api(`/api/products/${slug}`).then((payload) => {
       setData(payload);
       remember(payload.product.id);
+      trackViewContent(payload.product);
     }).catch((err) => setError(err.message));
   }, [slug, initial]);
 

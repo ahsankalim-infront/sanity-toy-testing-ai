@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { trackAddToCart as marketingAddToCart } from "../lib/marketing";
 
 const CartContext = createContext(null);
 
@@ -53,6 +54,7 @@ export function CartProvider({ children }) {
       return [...list, { id: product.id, slug: product.slug, name: product.name, emoji: product.emoji, image_url: product.image_url || "", image_alt: product.image_alt || "", price: product.price, gradient: product.gradient, qty: nextQty, stock }];
     });
     toast(`${product.name} added to cart`);
+    marketingAddToCart(product, qty);
     return true;
   }
 

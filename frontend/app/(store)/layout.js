@@ -4,9 +4,19 @@ import Footer from "../../components/Footer";
 import CarCursor from "../../components/CarCursor";
 import NavProgress from "../../components/NavProgress";
 import { WhatsAppFloat, WhatsAppProvider } from "../../components/WhatsApp";
+import MarketingScripts from "../../components/marketing/MarketingScripts";
 import { api } from "../../lib/format";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  try {
+    const shell = await api("/api/shell");
+    const token = String(shell.marketing?.google?.site_verification || "").trim();
+    if (token) return { verification: { google: token } };
+  } catch { /* store still renders without Search Console token */ }
+  return {};
+}
 
 export default async function StoreLayout({ children }) {
   let shell = null;
@@ -17,8 +27,10 @@ export default async function StoreLayout({ children }) {
     offline = err.message;
   }
   const whatsapp = (shell?.sections || []).find((row) => row.section_key === "whatsapp")?.payload || null;
+  const marketing = shell?.marketing || null;
   return (
     <WhatsAppProvider settings={whatsapp}>
+      <MarketingScripts marketing={marketing} />
       <Suspense fallback={null}><NavProgress /></Suspense>
       <CarCursor />
       {offline ? <div className="topbar">The store API is not running. Start the backend on port 4000. {offline}</div> : null}

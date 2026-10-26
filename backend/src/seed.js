@@ -349,6 +349,28 @@ function buildEngagementSections(startId) {
       text: "Log in to spin the wheel, open a gift box, or play Snake and Toy Cars. Coins you win come off your next toy order.",
       button: "Play now",
     }),
+    section(startId + 3, "google_marketing", "Google Search Console & Ads", startId + 3, {
+      site_verification: "",
+      ga4_measurement_id: "",
+      gtm_container_id: "",
+      google_ads_conversion_id: "",
+      google_ads_conversion_label: "",
+      prefer_gtm: 0,
+      track_purchase: 1,
+      notes: "Add your Search Console verification token, GA4 or GTM ID, and optional Google Ads conversion tag.",
+    }),
+    section(startId + 4, "meta_ads", "Meta Ads & Pixel", startId + 4, {
+      pixel_id: "",
+      test_event_code: "",
+      capi_access_token: "",
+      capi_enabled: 0,
+      track_page_view: 1,
+      track_view_content: 1,
+      track_add_to_cart: 1,
+      track_initiate_checkout: 1,
+      track_purchase: 1,
+      notes: "Connect Meta Pixel for ads and remarketing. Optional Conversions API token improves attribution when browsers block cookies.",
+    }),
   ];
 }
 

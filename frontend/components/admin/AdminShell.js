@@ -16,6 +16,8 @@ const LINKS = [
   ["/admin/payments", "Payment accounts"],
   ["/admin/pages", "Pages"],
   ["/admin/seo_entries", "SEO"],
+  ["/admin/google-marketing", "Google Console"],
+  ["/admin/meta-ads", "Meta Ads"],
   ["/admin/blog_posts", "Blog"],
   ["/admin/reviews", "Reviews"],
   ["/admin/coupons", "Coupons"],
